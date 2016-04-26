@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Node.js and Networking">
+    <meta name="keyword"  content="Node.js, JavaScript, Networking, TCP, Code, Running, HTTP">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Jellyfish Data Center Topology Review - Richard Lucas&#39; Blog
+        
+    </title>
+
+    <link rel="canonical" href="http://ralucas.github.io/2016/04/22/Jellyfish-Data-Center-Topology-Review/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Richard Lucas&#39; Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="http://ralucas.github.io/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/Jellyfish/" title="Jellyfish">Jellyfish</a>
+                        
+                          <a class="tag" href="/tags/Data-centers/" title="Data centers">Data centers</a>
+                        
+                          <a class="tag" href="/tags/Scaling/" title="Scaling">Scaling</a>
+                        
+                          <a class="tag" href="/tags/Networking/" title="Networking">Networking</a>
+                        
+
+                    </div>
+                    <h1>Jellyfish Data Center Topology Review</h1>
+                    
+                    <span class="meta">
+                        Posted by Richard Lucas on
+                        Apr 22 2016
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h3 id="What-is-Jellyfish"><a href="#What-is-Jellyfish" class="headerlink" title="What is Jellyfish?"></a>What is Jellyfish?</h3><p>Jellyfish, an <em>incrementally-expandable</em>, high-bandwidth data center networking topology based on randomness.</p>
+<blockquote>
+<p>Definition: a degree-bounded random graph topology among top-of-rack switches.</p>
+</blockquote>
+<p>Basically, it’s an unstructured network that utilizes a randomized topology for interconnection in a data center, unlike, for example a fat tree topology that utilizes hierarchies (Figure 1). It allows for construction of arbitrary-size networks that can be easily incrementally expanded as needs arise in the data center for capacity or bandwidth.</p>
+<p><img src="resources/0463E74CD6E2574BA0BAB3B1BBA7F63E.png" alt="fat-tree-topology.png"></p>
+<h3 id="Jellyfish-challenges"><a href="#Jellyfish-challenges" class="headerlink" title="Jellyfish challenges"></a>Jellyfish challenges</h3><p>As a result of an unstructured data center network, challenges arise:</p>
+<ol>
+<li>Routing</li>
+<li>Physical construction</li>
+<li>Cabling layout</li>
+</ol>
+<h3 id="How-it’s-constructed"><a href="#How-it’s-constructed" class="headerlink" title="How it’s constructed"></a>How it’s constructed</h3><p>Using the assumption that every switch has the same number of ports and servers, then with <code>N</code> racks, the network supports <code>N(k - r)</code> servers, where <code>k</code> is the number of ports and <code>r</code> is the number of ports used to connect to other racks. So, <code>k - r</code> is the number of ports that can be used to connect to servers. </p>
+<p>To wire this up, just pick a random pair of switches with free ports and link them and continue to do this process until all links are exhausted.</p>
+<h3 id="Key-Path-Length"><a href="#Key-Path-Length" class="headerlink" title="Key: Path Length"></a>Key: Path Length</h3><p>According to the authors, the end-to-end throughput of a data center’s topology (how fast does data flow through it) isn’t solely dependent on the capacity (bandwidth/speed) of the network.  Another important metric is the amount of network capacity that’s consumed in delivering each byte.  This is represented in <em>average path length</em>. In order to deliver each byte of data, a network takes a series of hops in delivering that data.  The less hops, the lower the average path length, the less network capacity consumed, therefore the faster the data can flow.  Jellyfish has a lower average path length than standard hierarchal models.</p>
+<p><img src="resources/DF1265ED7860D94F42585069B49DA6A0.png" alt="jellyfish_path_comparison.png"> (a) Fat-tree path lengths (b) Jellyfish path lengths</p>
+<h3 id="Key-Flexibility-and-Expansion"><a href="#Key-Flexibility-and-Expansion" class="headerlink" title="Key: Flexibility and Expansion"></a>Key: Flexibility and Expansion</h3><p>Jellyfish’s construction is such that incrementally adding even just one server rack or switch is quite simple.  The only rewiring necessary is limited to the number of ports being added. Additionally, Jellyfish allows for expansion using newer equipment that may have higher port-counts.  </p>
+<p><em>One note here:</em> Expansion may not produce uniform-random graph. However, topologies built incrementally versus those built from scratch show similar capacity throughputs and path lengths.</p>
+<h3 id="Key-Resilience"><a href="#Key-Resilience" class="headerlink" title="Key: Resilience"></a>Key: Resilience</h3><p>Jellyfish, in the face of failures, still maintains it’s structure.  Additionally, Jellyfish, in comparison with a fat-tree topology with less servers, supports the same capacity, path-length, and resilience.</p>
+<h4 id="Cabling"><a href="#Cabling" class="headerlink" title="Cabling"></a>Cabling</h4><p>In Jellyfish, there are more than twice as many cables running between switches than from servers to switches, so placing all the switches closely together makes sense.  It’s suggested that the switch-cluster, where the majority of cables congregate, be placed in the center of the data center, with aggregate cable bundles running to each server-rack.  Space should be left in the middle for additional switches and then more servers will just be added to the outside.</p>
+<p>In massive data centers, Jellyfish can be adapted with all of the pluses that it offers over fat-tree.</p>
+<h3 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h3><p>Jellyfish, a random graph based network topology, is a scalable topology for data centers that makes setup and expandability simple. Jellyfish, also, can support 25% more servers than fat-tree, has on-average shorter path-length, is highly failure resilient, and shows network capacity of better than 90% of other known topologies.</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2016/04/23/Securing-Internet-Routing/" data-toggle="tooltip" data-placement="top" title="Securing Internet Routing">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2016/04/20/Understanding-Dynamic-Adaptive-Streaming-over-HTTP/" data-toggle="tooltip" data-placement="top" title="Understanding DASH (Dynamic Adaptive Streaming over HTTP)">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        <a class="tag-link" href="/tags/BGP/">BGP</a><a class="tag-link" href="/tags/Bufferbloat/">Bufferbloat</a><a class="tag-link" href="/tags/CLI/">CLI</a><a class="tag-link" href="/tags/CSV/">CSV</a><a class="tag-link" href="/tags/Cleveland/">Cleveland</a><a class="tag-link" href="/tags/Climbing/">Climbing</a><a class="tag-link" href="/tags/CoDel/">CoDel</a><a class="tag-link" href="/tags/DASH/">DASH</a><a class="tag-link" href="/tags/Data-centers/">Data centers</a><a class="tag-link" href="/tags/HTTP/">HTTP</a><a class="tag-link" href="/tags/Injury/">Injury</a><a class="tag-link" href="/tags/JavaScript/">JavaScript</a><a class="tag-link" href="/tags/Jellyfish/">Jellyfish</a><a class="tag-link" href="/tags/Linux/">Linux</a><a class="tag-link" href="/tags/Linux-Mint/">Linux Mint</a><a class="tag-link" href="/tags/Marathon/">Marathon</a><a class="tag-link" href="/tags/Mockery/">Mockery</a><a class="tag-link" href="/tags/Mountaineer-s-Route/">Mountaineer's Route</a><a class="tag-link" href="/tags/Mountaineering/">Mountaineering</a><a class="tag-link" href="/tags/Mt-Whitney/">Mt. Whitney</a><a class="tag-link" href="/tags/Networking/">Networking</a><a class="tag-link" href="/tags/Node-js/">Node.js</a><a class="tag-link" href="/tags/Poem/">Poem</a><a class="tag-link" href="/tags/Postgres/">Postgres</a><a class="tag-link" href="/tags/Queue-delay/">Queue delay</a><a class="tag-link" href="/tags/Race-Report/">Race Report</a><a class="tag-link" href="/tags/Raymond-Carver/">Raymond Carver</a><a class="tag-link" href="/tags/Request/">Request</a><a class="tag-link" href="/tags/Router-buffers/">Router buffers</a><a class="tag-link" href="/tags/Routing/">Routing</a><a class="tag-link" href="/tags/Running/">Running</a><a class="tag-link" href="/tags/Scaling/">Scaling</a><a class="tag-link" href="/tags/Security/">Security</a><a class="tag-link" href="/tags/Sinon-js/">Sinon.js</a><a class="tag-link" href="/tags/Streaming/">Streaming</a><a class="tag-link" href="/tags/Supplant/">Supplant</a><a class="tag-link" href="/tags/TCP/">TCP</a><a class="tag-link" href="/tags/Templating/">Templating</a><a class="tag-link" href="/tags/Testing/">Testing</a><a class="tag-link" href="/tags/Tough-Mudder/">Tough Mudder</a><a class="tag-link" href="/tags/imagemagick/">imagemagick</a><a class="tag-link" href="/tags/resizing-images/">resizing images</a>
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="http://www.rangeandroam.com">Range &amp; Roam</a></li>
+                    
+                        <li><a href="http://www.richardalucas.com">Personal Site</a></li>
+                    
+                        <li><a href="http://www.helprequester.com">Help Requester</a></li>
+                    
+                        <li><a href="http://www.busboy.co">Busboy</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/r_a_lucas">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/ralucas">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Richard Lucas&#39; Blog 2016 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://ralucas.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-50082017-4';
+    var _gaDomain = 'blog.richardalucas.com';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="http://ralucas.github.io/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
