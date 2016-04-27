@@ -329,11 +329,9 @@
     <link href="http://ralucas.github.io/2015/08/14/Useful-CLI-Commands/"/>
     <id>http://ralucas.github.io/2015/08/14/Useful-CLI-Commands/</id>
     <published>2015-08-15T03:37:59.000Z</published>
-    <updated>2015-08-15T03:37:59.000Z</updated>
+    <updated>2016-04-27T13:41:11.000Z</updated>
     
-    <content type="html">&lt;p&gt;###Some CLI Commands that I’ve found useful:&lt;/p&gt;
-&lt;p&gt;####Viewing processes and killing them&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;$ lsof -Pi | grep LISTEN&lt;/code&gt;&lt;/p&gt;
+    <content type="html">&lt;h2 id=&quot;Some-CLI-Commands-that-I’ve-found-useful&quot;&gt;&lt;a href=&quot;#Some-CLI-Commands-that-I’ve-found-useful&quot; class=&quot;headerlink&quot; title=&quot;Some CLI Commands that I’ve found useful:&quot;&gt;&lt;/a&gt;Some CLI Commands that I’ve found useful:&lt;/h2&gt;&lt;h4 id=&quot;Viewing-processes-and-killing-them&quot;&gt;&lt;a href=&quot;#Viewing-processes-and-killing-them&quot; class=&quot;headerlink&quot; title=&quot;Viewing processes and killing them&quot;&gt;&lt;/a&gt;Viewing processes and killing them&lt;/h4&gt;&lt;p&gt;&lt;code&gt;$ lsof -Pi | grep LISTEN&lt;/code&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Displays processes running and ports&lt;/li&gt;
 &lt;li&gt;The PID is the second number (2nd column from left)&lt;/li&gt;
@@ -342,8 +340,7 @@
 &lt;ul&gt;
 &lt;li&gt;This kills the process at the entered PID with extreme prejudice&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;####Using find&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;$ find . -name &amp;#39;*.css&amp;#39;&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&quot;Using-find&quot;&gt;&lt;a href=&quot;#Using-find&quot; class=&quot;headerlink&quot; title=&quot;Using find&quot;&gt;&lt;/a&gt;Using find&lt;/h4&gt;&lt;p&gt;&lt;code&gt;$ find . -name &amp;#39;*.css&amp;#39;&lt;/code&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;This will recurse all directories and list all CSS files (and directories ending with “.css”) under the current directory (represented by “.”)&lt;/li&gt;
 &lt;/ul&gt;
@@ -371,25 +368,30 @@
 &lt;ul&gt;
 &lt;li&gt;combine with xargs for more power than -exec&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;####Deleting a folder and it’s contents&lt;br&gt;&lt;em&gt;Please use carefully&lt;/em&gt;&lt;/p&gt;
+&lt;h4 id=&quot;Deleting-a-folder-and-it’s-contents&quot;&gt;&lt;a href=&quot;#Deleting-a-folder-and-it’s-contents&quot; class=&quot;headerlink&quot; title=&quot;Deleting a folder and it’s contents&quot;&gt;&lt;/a&gt;Deleting a folder and it’s contents&lt;/h4&gt;&lt;p&gt;&lt;em&gt;Please use carefully&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;$ rm -rf [folder_name]&lt;/code&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Always include a folder name&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;####Copying a folder and contents&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;$ cp -avr /from/folder /to/new_folder&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&quot;Copying-a-folder-and-contents&quot;&gt;&lt;a href=&quot;#Copying-a-folder-and-contents&quot; class=&quot;headerlink&quot; title=&quot;Copying a folder and contents&quot;&gt;&lt;/a&gt;Copying a folder and contents&lt;/h4&gt;&lt;p&gt;&lt;code&gt;$ cp -avr /from/folder /to/new_folder&lt;/code&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;-a : Preserve the specified attributes such as directory an file mode, ownership, timestamps, if possible additional attributes: context, links, xattr, all.&lt;/li&gt;
 &lt;li&gt;-v : Explain what is being done (verbose).&lt;/li&gt;
 &lt;li&gt;-r : Copy directories recursively.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;####What is grep&lt;/p&gt;
-&lt;ul&gt;
+&lt;h4 id=&quot;What-is-grep&quot;&gt;&lt;a href=&quot;#What-is-grep&quot; class=&quot;headerlink&quot; title=&quot;What is grep&quot;&gt;&lt;/a&gt;What is grep&lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;It is a command that finds text/strings inside of files&lt;/li&gt;
-&lt;li&gt;It can take regular expressions&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;It can take regular expressions&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;recurse through a directory&lt;/p&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;####Make a file (…for testing…)&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ grep -r &amp;#39;lookforthisexpression&amp;#39; files/*&lt;/code&gt;&lt;/p&gt;
 &lt;ul&gt;
+&lt;li&gt;case insensitive search&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ grep -i &amp;#39;anycaseterm&amp;#39; file.txt&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&quot;Make-a-file-…for-testing…&quot;&gt;&lt;a href=&quot;#Make-a-file-…for-testing…&quot; class=&quot;headerlink&quot; title=&quot;Make a file (…for testing…)&quot;&gt;&lt;/a&gt;Make a file (…for testing…)&lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;mkfile command&lt;/li&gt;
 &lt;li&gt;input number, then size (i.e. k for kb or g for gb), then filename&lt;/li&gt;
 &lt;/ul&gt;
@@ -404,9 +406,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;###Some CLI Commands that I’ve found useful:&lt;/p&gt;
-&lt;p&gt;####Viewing processes and killing them&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;$ lsof -Pi | grep LISTEN&lt;/code&gt;&lt;/
+      &lt;h2 id=&quot;Some-CLI-Commands-that-I’ve-found-useful&quot;&gt;&lt;a href=&quot;#Some-CLI-Commands-that-I’ve-found-useful&quot; class=&quot;headerlink&quot; title=&quot;Some CLI Com
     
     </summary>
     

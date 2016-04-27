@@ -170,9 +170,7 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-                <p>###Some CLI Commands that I’ve found useful:</p>
-<p>####Viewing processes and killing them</p>
-<p><code>$ lsof -Pi | grep LISTEN</code></p>
+                <h2 id="Some-CLI-Commands-that-I’ve-found-useful"><a href="#Some-CLI-Commands-that-I’ve-found-useful" class="headerlink" title="Some CLI Commands that I’ve found useful:"></a>Some CLI Commands that I’ve found useful:</h2><h4 id="Viewing-processes-and-killing-them"><a href="#Viewing-processes-and-killing-them" class="headerlink" title="Viewing processes and killing them"></a>Viewing processes and killing them</h4><p><code>$ lsof -Pi | grep LISTEN</code></p>
 <ul>
 <li>Displays processes running and ports</li>
 <li>The PID is the second number (2nd column from left)</li>
@@ -181,8 +179,7 @@
 <ul>
 <li>This kills the process at the entered PID with extreme prejudice</li>
 </ul>
-<p>####Using find</p>
-<p><code>$ find . -name &#39;*.css&#39;</code></p>
+<h4 id="Using-find"><a href="#Using-find" class="headerlink" title="Using find"></a>Using find</h4><p><code>$ find . -name &#39;*.css&#39;</code></p>
 <ul>
 <li>This will recurse all directories and list all CSS files (and directories ending with “.css”) under the current directory (represented by “.”)</li>
 </ul>
@@ -210,25 +207,30 @@
 <ul>
 <li>combine with xargs for more power than -exec</li>
 </ul>
-<p>####Deleting a folder and it’s contents<br><em>Please use carefully</em></p>
+<h4 id="Deleting-a-folder-and-it’s-contents"><a href="#Deleting-a-folder-and-it’s-contents" class="headerlink" title="Deleting a folder and it’s contents"></a>Deleting a folder and it’s contents</h4><p><em>Please use carefully</em></p>
 <p><code>$ rm -rf [folder_name]</code></p>
 <ul>
 <li>Always include a folder name</li>
 </ul>
-<p>####Copying a folder and contents</p>
-<p><code>$ cp -avr /from/folder /to/new_folder</code></p>
+<h4 id="Copying-a-folder-and-contents"><a href="#Copying-a-folder-and-contents" class="headerlink" title="Copying a folder and contents"></a>Copying a folder and contents</h4><p><code>$ cp -avr /from/folder /to/new_folder</code></p>
 <ul>
 <li>-a : Preserve the specified attributes such as directory an file mode, ownership, timestamps, if possible additional attributes: context, links, xattr, all.</li>
 <li>-v : Explain what is being done (verbose).</li>
 <li>-r : Copy directories recursively.</li>
 </ul>
-<p>####What is grep</p>
-<ul>
+<h4 id="What-is-grep"><a href="#What-is-grep" class="headerlink" title="What is grep"></a>What is grep</h4><ul>
 <li>It is a command that finds text/strings inside of files</li>
-<li>It can take regular expressions</li>
+<li><p>It can take regular expressions</p>
+</li>
+<li><p>recurse through a directory</p>
+</li>
 </ul>
-<p>####Make a file (…for testing…)</p>
+<p><code>$ grep -r &#39;lookforthisexpression&#39; files/*</code></p>
 <ul>
+<li>case insensitive search</li>
+</ul>
+<p><code>$ grep -i &#39;anycaseterm&#39; file.txt</code></p>
+<h4 id="Make-a-file-…for-testing…"><a href="#Make-a-file-…for-testing…" class="headerlink" title="Make a file (…for testing…)"></a>Make a file (…for testing…)</h4><ul>
 <li>mkfile command</li>
 <li>input number, then size (i.e. k for kb or g for gb), then filename</li>
 </ul>
