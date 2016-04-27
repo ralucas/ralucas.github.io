@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Richard Lucas&#39; Blog</title>
+  <subtitle>Node.js and more...</subtitle>
+  <link href="/feed.xml" rel="self"/>
+  
+  <link href="http://ralucas.github.io/"/>
+  <updated>2016-04-23T16:57:33.000Z</updated>
+  <id>http://ralucas.github.io/</id>
+  
+  <author>
+    <name>Richard Lucas</name>
+    <email>richard@richardalucas.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Securing Internet Routing</title>
+    <link href="http://ralucas.github.io/2016/04/23/Securing-Internet-Routing/"/>
+    <id>http://ralucas.github.io/2016/04/23/Securing-Internet-Routing/</id>
+    <published>2016-04-23T06:00:00.000Z</published>
+    <updated>2016-04-23T16:57:33.000Z</updated>
+    
+    <content type="html">&lt;h3 id=&quot;Border-Gateway-Protocol-BGP&quot;&gt;&lt;a href=&quot;#Border-Gateway-Protocol-BGP&quot; class=&quot;headerlink&quot; title=&quot;Border Gateway Protocol (BGP)&quot;&gt;&lt;/a&gt;Border Gateway Protocol (BGP)&lt;/h3&gt;&lt;p&gt;BGP, an important piece of the larger Internet’s architecture, is a protocol that enables the setting up of routing and exchange of reachability information between large networks (Autonomous Systems). It’s the protocol used to develop routes between these Autonomous Systems (ASes), routing to destinations via IP prefixes. BGP makes announcements that the ASes use to discover routes to these IP prefixes. &lt;/p&gt;
+&lt;p&gt;BGP is important to the business of the Internet, advertising routes, routing based on business relationships. ASes usually make sure that it’s in their “best” interest before routing traffic and there is a rule-of-thumb that seems to be generally followed:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;An AS will advertise a route to a neighboring AS if:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The neighbor is a customer, or&lt;/li&gt;
+&lt;li&gt;The route is for a prefix originated by the advertising AS, or&lt;/li&gt;
+&lt;li&gt;The route is through a customer of the advertising AS&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;BGP was originally introduced, like many of the protocols in use in the Internet, in the early days, when the Internet was more innocent.  So, issues with security persist surrounding the protocol.&lt;/p&gt;
+&lt;h3 id=&quot;BGP-Security-Risks&quot;&gt;&lt;a href=&quot;#BGP-Security-Risks&quot; class=&quot;headerlink&quot; title=&quot;BGP Security Risks&quot;&gt;&lt;/a&gt;BGP Security Risks&lt;/h3&gt;&lt;h4 id=&quot;Hijacks&quot;&gt;&lt;a href=&quot;#Hijacks&quot; class=&quot;headerlink&quot; title=&quot;Hijacks&quot;&gt;&lt;/a&gt;Hijacks&lt;/h4&gt;&lt;p&gt;BGP doesn’t have in place any mechanism to properly authenticate allocations of IP prefixes to ASes, so as a result entire IP prefix blocks can be hijacked fairly easily, either accidently or purposefully.  There are two main types of hijacks: Prefix and subprefix.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Prefix:&lt;/em&gt;&lt;br&gt;The hijacker AS originates and announces the &lt;em&gt;exact same&lt;/em&gt; prefix as a legitimate AS that has the IP allocation.  The announcement gets propogated through the system and other ASes begin chosing their routes for that IP prefix and some will chose to go through the bogus AS, others won’t, given route length.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Subprefix:&lt;/em&gt;&lt;br&gt;The hijacker AS can potentially intercept 100% of the network traffic.  Here the hijacker originates a prefix that is covered by the victim IP prefix.  BGP uses longest-prefix match (LPM), so if a hijacker were to advertise a prefix that was LPM, then traffic would redirect to the hijacker AS.&lt;/p&gt;
+&lt;h4 id=&quot;Route-Leaks&quot;&gt;&lt;a href=&quot;#Route-Leaks&quot; class=&quot;headerlink&quot; title=&quot;Route Leaks&quot;&gt;&lt;/a&gt;Route Leaks&lt;/h4&gt;&lt;p&gt;This isn’t a bogus route, but instead the leaker announces a legitimate route, but does it to too many of its neighbors.  So, then the leaker is overwhelmed by traffic from its neighbors that are now utilizing the leaked route. This can be disastrous if the leaker is not designed to handle high levels of traffic.&lt;/p&gt;
+&lt;h4 id=&quot;Path-Shortening-Attack&quot;&gt;&lt;a href=&quot;#Path-Shortening-Attack&quot; class=&quot;headerlink&quot; title=&quot;Path-Shortening Attack&quot;&gt;&lt;/a&gt;Path-Shortening Attack&lt;/h4&gt;&lt;p&gt;An attacker announces a short bogus path to a prefix that terminates at an authorized origin AS.&lt;/p&gt;
+&lt;h4 id=&quot;Protocol-downgrade-attack&quot;&gt;&lt;a href=&quot;#Protocol-downgrade-attack&quot; class=&quot;headerlink&quot; title=&quot;Protocol downgrade attack&quot;&gt;&lt;/a&gt;Protocol downgrade attack&lt;/h4&gt;&lt;p&gt;ASes that have, for instance, deployed BGPSEC can be convinced by an attacker to select a bogus path instead of the secured route because it’s cheaper.&lt;/p&gt;
+&lt;h4 id=&quot;Incident-Impact&quot;&gt;&lt;a href=&quot;#Incident-Impact&quot; class=&quot;headerlink&quot; title=&quot;Incident Impact&quot;&gt;&lt;/a&gt;Incident Impact&lt;/h4&gt;&lt;p&gt;&lt;em&gt;Blackhole:&lt;/em&gt;&lt;br&gt;Network traffic stops at the perpetrator AS and goes no further.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Interception:&lt;/em&gt;&lt;br&gt;Perpetrator AS invisibly intercepts traffic and the traffic also continues onto it’s intended destination.&lt;/p&gt;
+&lt;h3 id=&quot;BGP-Defense-Mechanisms&quot;&gt;&lt;a href=&quot;#BGP-Defense-Mechanisms&quot; class=&quot;headerlink&quot; title=&quot;BGP Defense Mechanisms&quot;&gt;&lt;/a&gt;BGP Defense Mechanisms&lt;/h3&gt;&lt;h4 id=&quot;Prefix-filtering&quot;&gt;&lt;a href=&quot;#Prefix-filtering&quot; class=&quot;headerlink&quot; title=&quot;Prefix filtering&quot;&gt;&lt;/a&gt;Prefix filtering&lt;/h4&gt;&lt;p&gt;A whitelisting technique used to filter out bad BGP announcements. It works by using the AS rule-of-thumb and keeping a prefix list of IP prefixes of customers and ignoring any announcement from a customer not on the list. This defense has been used since the 1990s. &lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Upsides:&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It is simple and effective mechanism and if all ASes deployed it, a large portion of routing leaks and hijacks would be prevented.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;Downsides:&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The downside is that it only works on customer leaks. &lt;/li&gt;
+&lt;li&gt;ASes also aren’t necessarily incentivized to deploy this filtering outside of good Internet citzenship.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&quot;RPKI&quot;&gt;&lt;a href=&quot;#RPKI&quot; class=&quot;headerlink&quot; title=&quot;RPKI&quot;&gt;&lt;/a&gt;RPKI&lt;/h4&gt;&lt;p&gt;Resource Public Key Infrastructure (RPKI) is another defense method that provides a trusted mapping from allocated IP prefixes to BGP authorized ASes for origination.  It creates a cryptographic hierarchy of authorities, which is rooted at the regional Internet registries (i.e. ARIN, RIPE, AfriNIC, etc.). The holder of the certificate for a prefix can then sign an authorization allowing a prefix to be originated via BGP.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Upsides:&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Does not require any modification to current BGP message formats&lt;/li&gt;
+&lt;li&gt;Cryptography can be performed offline&lt;/li&gt;
+&lt;li&gt;As opposed to Prefix Filtering, it doesn’t tie itself to potential political/business conflict of interests as it can be used to filter BGP announcements made by any neighbor.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;Downsides:&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Potential for abuse of the RPKI, i.e. RPKI being attacked, misconfigured, or abused in some other way in which trust is lost in the protocol.&lt;/li&gt;
+&lt;li&gt;Cannot prevent route leaking attacks as it’s purpose is to prevent unauthorized messages, whereas route leaks come from authorized origins.&lt;/li&gt;
+&lt;li&gt;Cannot prevent path-shortening attack as the origin is legitimate and shortest path takes precedence.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&quot;BGPSEC&quot;&gt;&lt;a href=&quot;#BGPSEC&quot; class=&quot;headerlink&quot; title=&quot;BGPSEC&quot;&gt;&lt;/a&gt;BGPSEC&lt;/h4&gt;&lt;p&gt;BGPSEC, currently in standardization process by the IETF, builds on RPKI, adding crypto signatures to BCP messages.  Each AS must sign a BGP message upon announcement. The signature includes the prefix and AS-level path, the AS number of the AS receiving the message, and all the previous signed messages received from previous ASes on the path.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Upsides:&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;No path-shortening attacks are possible because a shortened path would not pass the signature checks required as the origin would be checked against neighbor signatures.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;Downsides:&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Unlike RPKI, BGPSEC is online crypto as routers sign and verify the BGP messages.  This has a higher computational load, requiring the routers to be designed and built with that in mind.&lt;/li&gt;
+&lt;li&gt;To gain the full benefits of BGPSEC, every AS needs to deploy it. This requires that the already decentralized ASes, who have their own political and business objectives, to agree to use this protocol.&lt;ul&gt;
+&lt;li&gt;To remedy this, one way is to gain traction via early adoption by some of the ASes&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;ASes tend to prioritize economic demands over those of security demands and given that BGPSEC only provides some small benefits over RPKI, ASes are not as incentivized.&lt;/li&gt;
+&lt;li&gt;Suffers from protocol downgrade attacks.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;[1] Goldberg, 2014. &lt;a href=&quot;http://queue.acm.org/detail.cfm?id=2668966&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;em&gt;Why is it taking so long to secure internet routing&lt;/em&gt;&lt;/a&gt; &lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;Border-Gateway-Protocol-BGP&quot;&gt;&lt;a href=&quot;#Border-Gateway-Protocol-BGP&quot; class=&quot;headerlink&quot; title=&quot;Border Gateway Protocol (BGP)&quot;&gt;&lt;/a&gt;Bor
+    
+    </summary>
+    
+    
+      <category term="Networking" scheme="http://ralucas.github.io/tags/Networking/"/>
+    
+      <category term="BGP" scheme="http://ralucas.github.io/tags/BGP/"/>
+    
+      <category term="Security" scheme="http://ralucas.github.io/tags/Security/"/>
+    
+      <category term="Routing" scheme="http://ralucas.github.io/tags/Routing/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Jellyfish Data Center Topology Review</title>
+    <link href="http://ralucas.github.io/2016/04/22/Jellyfish-Data-Center-Topology-Review/"/>
+    <id>http://ralucas.github.io/2016/04/22/Jellyfish-Data-Center-Topology-Review/</id>
+    <published>2016-04-22T06:00:00.000Z</published>
+    <updated>2016-04-27T09:02:57.000Z</updated>
+    
+    <content type="html">&lt;h3 id=&quot;What-is-Jellyfish&quot;&gt;&lt;a href=&quot;#What-is-Jellyfish&quot; class=&quot;headerlink&quot; title=&quot;What is Jellyfish?&quot;&gt;&lt;/a&gt;What is Jellyfish?&lt;/h3&gt;&lt;p&gt;Jellyfish, an &lt;em&gt;incrementally-expandable&lt;/em&gt;, high-bandwidth data center networking topology based on randomness.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Definition: a degree-bounded random graph topology among top-of-rack switches.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Basically, it’s an unstructured network that utilizes a randomized topology for interconnection in a data center, unlike, for example a fat tree topology that utilizes hierarchies (Figure 1). It allows for construction of arbitrary-size networks that can be easily incrementally expanded as needs arise in the data center for capacity or bandwidth.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/resources/0463E74CD6E2574BA0BAB3B1BBA7F63E.png&quot; alt=&quot;fat-tree-topology.png&quot;&gt;&lt;/p&gt;
+&lt;h3 id=&quot;Jellyfish-challenges&quot;&gt;&lt;a href=&quot;#Jellyfish-challenges&quot; class=&quot;headerlink&quot; title=&quot;Jellyfish challenges&quot;&gt;&lt;/a&gt;Jellyfish challenges&lt;/h3&gt;&lt;p&gt;As a result of an unstructured data center network, challenges arise:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Routing&lt;/li&gt;
+&lt;li&gt;Physical construction&lt;/li&gt;
+&lt;li&gt;Cabling layout&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&quot;How-it’s-constructed&quot;&gt;&lt;a href=&quot;#How-it’s-constructed&quot; class=&quot;headerlink&quot; title=&quot;How it’s constructed&quot;&gt;&lt;/a&gt;How it’s constructed&lt;/h3&gt;&lt;p&gt;Using the assumption that every switch has the same number of ports and servers, then with &lt;code&gt;N&lt;/code&gt; racks, the network supports &lt;code&gt;N(k - r)&lt;/code&gt; servers, where &lt;code&gt;k&lt;/code&gt; is the number of ports and &lt;code&gt;r&lt;/code&gt; is the number of ports used to connect to other racks. So, &lt;code&gt;k - r&lt;/code&gt; is the number of ports that can be used to connect to servers. &lt;/p&gt;
+&lt;p&gt;To wire this up, just pick a random pair of switches with free ports and link them and continue to do this process until all links are exhausted.&lt;/p&gt;
+&lt;h3 id=&quot;Key-Path-Length&quot;&gt;&lt;a href=&quot;#Key-Path-Length&quot; class=&quot;headerlink&quot; title=&quot;Key: Path Length&quot;&gt;&lt;/a&gt;Key: Path Length&lt;/h3&gt;&lt;p&gt;According to the authors, the end-to-end throughput of a data center’s topology (how fast does data flow through it) isn’t solely dependent on the capacity (bandwidth/speed) of the network.  Another important metric is the amount of network capacity that’s consumed in delivering each byte.  This is represented in &lt;em&gt;average path length&lt;/em&gt;. In order to deliver each byte of data, a network takes a series of hops in delivering that data.  The less hops, the lower the average path length, the less network capacity consumed, therefore the faster the data can flow.  Jellyfish has a lower average path length than standard hierarchal models.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/resources/DF1265ED7860D94F42585069B49DA6A0.png&quot; alt=&quot;jellyfish_path_comparison.png&quot;&gt; (a) Fat-tree path lengths (b) Jellyfish path lengths&lt;/p&gt;
+&lt;h3 id=&quot;Key-Flexibility-and-Expansion&quot;&gt;&lt;a href=&quot;#Key-Flexibility-and-Expansion&quot; class=&quot;headerlink&quot; title=&quot;Key: Flexibility and Expansion&quot;&gt;&lt;/a&gt;Key: Flexibility and Expansion&lt;/h3&gt;&lt;p&gt;Jellyfish’s construction is such that incrementally adding even just one server rack or switch is quite simple.  The only rewiring necessary is limited to the number of ports being added. Additionally, Jellyfish allows for expansion using newer equipment that may have higher port-counts.  &lt;/p&gt;
+&lt;p&gt;&lt;em&gt;One note here:&lt;/em&gt; Expansion may not produce uniform-random graph. However, topologies built incrementally versus those built from scratch show similar capacity throughputs and path lengths.&lt;/p&gt;
+&lt;h3 id=&quot;Key-Resilience&quot;&gt;&lt;a href=&quot;#Key-Resilience&quot; class=&quot;headerlink&quot; title=&quot;Key: Resilience&quot;&gt;&lt;/a&gt;Key: Resilience&lt;/h3&gt;&lt;p&gt;Jellyfish, in the face of failures, still maintains it’s structure.  Additionally, Jellyfish, in comparison with a fat-tree topology with less servers, supports the same capacity, path-length, and resilience.&lt;/p&gt;
+&lt;h4 id=&quot;Cabling&quot;&gt;&lt;a href=&quot;#Cabling&quot; class=&quot;headerlink&quot; title=&quot;Cabling&quot;&gt;&lt;/a&gt;Cabling&lt;/h4&gt;&lt;p&gt;In Jellyfish, there are more than twice as many cables running between switches than from servers to switches, so placing all the switches closely together makes sense.  It’s suggested that the switch-cluster, where the majority of cables congregate, be placed in the center of the data center, with aggregate cable bundles running to each server-rack.  Space should be left in the middle for additional switches and then more servers will just be added to the outside.&lt;/p&gt;
+&lt;p&gt;In massive data centers, Jellyfish can be adapted with all of the pluses that it offers over fat-tree.&lt;/p&gt;
+&lt;h3 id=&quot;Conclusion&quot;&gt;&lt;a href=&quot;#Conclusion&quot; class=&quot;headerlink&quot; title=&quot;Conclusion&quot;&gt;&lt;/a&gt;Conclusion&lt;/h3&gt;&lt;p&gt;Jellyfish, a random graph based network topology, is a scalable topology for data centers that makes setup and expandability simple. Jellyfish, also, can support 25% more servers than fat-tree, has on-average shorter path-length, is highly failure resilient, and shows network capacity of better than 90% of other known topologies.&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;What-is-Jellyfish&quot;&gt;&lt;a href=&quot;#What-is-Jellyfish&quot; class=&quot;headerlink&quot; title=&quot;What is Jellyfish?&quot;&gt;&lt;/a&gt;What is Jellyfish?&lt;/h3&gt;&lt;p&gt;Jellyfis
+    
+    </summary>
+    
+    
+      <category term="Jellyfish" scheme="http://ralucas.github.io/tags/Jellyfish/"/>
+    
+      <category term="Data centers" scheme="http://ralucas.github.io/tags/Data-centers/"/>
+    
+      <category term="Scaling" scheme="http://ralucas.github.io/tags/Scaling/"/>
+    
+      <category term="Networking" scheme="http://ralucas.github.io/tags/Networking/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Understanding DASH (Dynamic Adaptive Streaming over HTTP)</title>
+    <link href="http://ralucas.github.io/2016/04/20/Understanding-Dynamic-Adaptive-Streaming-over-HTTP/"/>
+    <id>http://ralucas.github.io/2016/04/20/Understanding-Dynamic-Adaptive-Streaming-over-HTTP/</id>
+    <published>2016-04-20T06:00:00.000Z</published>
+    <updated>2016-04-20T07:08:08.000Z</updated>
+    
+    <content type="html">&lt;h3 id=&quot;What-is-DASH-comparatively&quot;&gt;&lt;a href=&quot;#What-is-DASH-comparatively&quot; class=&quot;headerlink&quot; title=&quot;What is DASH, comparatively?&quot;&gt;&lt;/a&gt;What is DASH, comparatively?&lt;/h3&gt;&lt;p&gt;Dynamic Adaptive Streaming over HTTP (DASH) is a standard that intends to address weaknesses in RTSP and progressive download methods currently used in streaming content over the internet.  &lt;/p&gt;
+&lt;h4 id=&quot;RTSP&quot;&gt;&lt;a href=&quot;#RTSP&quot; class=&quot;headerlink&quot; title=&quot;RTSP&quot;&gt;&lt;/a&gt;RTSP&lt;/h4&gt;&lt;p&gt;RTSP is a streaming protocol that manages a stateful connection with the client, tracking the state through the client interation.  &lt;/p&gt;
+&lt;h4 id=&quot;Progressive&quot;&gt;&lt;a href=&quot;#Progressive&quot; class=&quot;headerlink&quot; title=&quot;Progressive&quot;&gt;&lt;/a&gt;Progressive&lt;/h4&gt;&lt;p&gt;Progressive download can utilize HTTP and uses byte range requests to respond to the client.  The issues with progressive are that it’s not bitrate responsive, bandwidth can potentially be wasted if the user switches their request, and doesn’t do live media. Despite these weakeness, progressive download enjoys wide adoption&lt;/p&gt;
+&lt;h3 id=&quot;Why-use-HTTP&quot;&gt;&lt;a href=&quot;#Why-use-HTTP&quot; class=&quot;headerlink&quot; title=&quot;Why use HTTP?&quot;&gt;&lt;/a&gt;Why use HTTP?&lt;/h3&gt;&lt;p&gt;Content Delivery Networks (CDNs) have proliferated all over the world and given this, their scale, and their reliability, using them to manage streaming services just makes sense and…they use HTTP.  Here are the nine reason’s Mr. Stockhammer gives [1] (my paraphrasing):&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;HTTP Streaming is spreading widely as a form of delivery of Internet Video&lt;/li&gt;
+&lt;li&gt;Trend towards HTTP as the main protocol for media delivery over the Internet&lt;/li&gt;
+&lt;li&gt;Given the wide deployment of HTTP along with the TCP/IP stack, it probides reliabiliy and easy deployment&lt;/li&gt;
+&lt;li&gt;HTTP avoids NAT and firewall traversal issues as it doesn’t require a dedicated connection…it’s stateless&lt;/li&gt;
+&lt;li&gt;Allows delivery mechanisms and common methods such as CDNs, HTTP Caches, and HTTP Servers to be used, which already exist in profligate&lt;/li&gt;
+&lt;li&gt;Moves control of the HTTP session to the client&lt;/li&gt;
+&lt;li&gt;Provides the ability of the client to choose content rate given bandwidth as opposed to having the streaming server negotiate that&lt;/li&gt;
+&lt;li&gt;Allows content rate to be seamlessly changed on the fly given changes in bandwidth&lt;/li&gt;
+&lt;li&gt;Has the potential to accelerate fixed-mobile convergence.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&quot;DASH-Goals&quot;&gt;&lt;a href=&quot;#DASH-Goals&quot; class=&quot;headerlink&quot; title=&quot;DASH Goals&quot;&gt;&lt;/a&gt;DASH Goals&lt;/h3&gt;&lt;p&gt;The DASH solution is intended to:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;support delivery of media in ISO base media file formats&lt;/li&gt;
+&lt;li&gt;stay out of presentation logic&lt;/li&gt;
+&lt;li&gt;permit integration of different presentation frameworks&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The protocol then in turn intends to define:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Media Presentation as a stuctured collection of data&lt;/li&gt;
+&lt;li&gt;Formats of Segments, an integral data unit of a Media Presentation, that can be HTTP URI addressable&lt;/li&gt;
+&lt;li&gt;Delivery protocol of Segment, i.e. HTTP/1.1&lt;/li&gt;
+&lt;li&gt;A how-to for the client to utitlize the above information to establish a streaming service&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;It supports features:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Fast initial startup and seeking&lt;/li&gt;
+&lt;li&gt;bandwidth efficiency&lt;/li&gt;
+&lt;li&gt;adaptive bitrate switching&lt;/li&gt;
+&lt;li&gt;adaption to CDN properties&lt;/li&gt;
+&lt;li&gt;reuse of HTTP-servers and caches&lt;/li&gt;
+&lt;li&gt;reuse of existing media playout engines&lt;/li&gt;
+&lt;li&gt;Support for on-demand, live play&lt;/li&gt;
+&lt;li&gt;Simplicity&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&quot;Overall&quot;&gt;&lt;a href=&quot;#Overall&quot; class=&quot;headerlink&quot; title=&quot;Overall&quot;&gt;&lt;/a&gt;Overall&lt;/h3&gt;&lt;p&gt;DASH is a media streaming protocol that seeks to improve upon some of the known issues with RTSP and progressive download, while taking advantage of an already common and well-supported application protocol, HTTP.  It was intended to be easily adapted to existing infrastructure, particularly the usage of HTTP CDNs.  It’s intended to be generic enough so that it’s independent of media format.  It’s main features are it’s adaptatability to changing network bandwidth, existing HTTP infrastructure, media formats, and flexibility to client presentations.&lt;/p&gt;
+&lt;p&gt;[1] Stockhammer, 2011. &lt;a href=&quot;https://www.w3.org/2010/11/web-and-tv/papers/webtv2_submission_64.pdf&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Dynamic Adaptive Streaming over HTTP - Design Principles and Standards&lt;/a&gt;&lt;br&gt;[2] &lt;a href=&quot;http://www.cisco.com/c/en/us/solutions/collateral/service-provider/visual-networking-index-vni/mobile-white-paper-c11-520862.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Cisco Visual Networking Index: Global Mobile Data Traffic Forecast Update, 2015–2020 White Paper&lt;/a&gt;, February 2016&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;What-is-DASH-comparatively&quot;&gt;&lt;a href=&quot;#What-is-DASH-comparatively&quot; class=&quot;headerlink&quot; title=&quot;What is DASH, comparatively?&quot;&gt;&lt;/a&gt;What i
+    
+    </summary>
+    
+    
+      <category term="Networking" scheme="http://ralucas.github.io/tags/Networking/"/>
+    
+      <category term="HTTP" scheme="http://ralucas.github.io/tags/HTTP/"/>
+    
+      <category term="DASH" scheme="http://ralucas.github.io/tags/DASH/"/>
+    
+      <category term="Streaming" scheme="http://ralucas.github.io/tags/Streaming/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Understanding Controlling Queue Delay and CoDel</title>
+    <link href="http://ralucas.github.io/2016/04/19/Understanding-Controlling-Queue-Delay/"/>
+    <id>http://ralucas.github.io/2016/04/19/Understanding-Controlling-Queue-Delay/</id>
+    <published>2016-04-19T06:00:00.000Z</published>
+    <updated>2016-04-20T04:25:28.000Z</updated>
+    
+    <content type="html">&lt;p&gt;This is a survey of the “Controlling Queue Delaty” academic paper by Kathleen Nichols and Van Jacobson from ACMQueue in 2012.[1]&lt;/p&gt;
+&lt;h3 id=&quot;Bufferbloat-is-still-a-problem&quot;&gt;&lt;a href=&quot;#Bufferbloat-is-still-a-problem&quot; class=&quot;headerlink&quot; title=&quot;Bufferbloat is still a problem!&quot;&gt;&lt;/a&gt;Bufferbloat is still a problem!&lt;/h3&gt;&lt;p&gt;Packet-based networks use buffers to handle short-term fluctuation in traffic flow. Bufferbloat describes the standing packet queue that’s created when there is a mismatch between the senders maximum send rate (window size) and the bottleneck’s pipe size. This issue of bufferbloat has been known for many decades now. &lt;/p&gt;
+&lt;p&gt;And given all the streaming today, it’s an important issue as applications today are much more delay-sensitive.&lt;/p&gt;
+&lt;h3 id=&quot;The-Standing-Queue&quot;&gt;&lt;a href=&quot;#The-Standing-Queue&quot; class=&quot;headerlink&quot; title=&quot;The Standing Queue&quot;&gt;&lt;/a&gt;The Standing Queue&lt;/h3&gt;&lt;p&gt;This standing queue is the result from this mismatch. Because it creates delays and doesn’t improve throughput, it gets seen as a congestion issue and not properly seen in the light of queue or traffic theory.  This is due to theorists seeing TCP’s reliable and highly correlated process, in which the packet arrival rate equals the departure rate, as improbable.&lt;/p&gt;
+&lt;h3 id=&quot;Not-an-easy-problem&quot;&gt;&lt;a href=&quot;#Not-an-easy-problem&quot; class=&quot;headerlink&quot; title=&quot;Not an easy problem&quot;&gt;&lt;/a&gt;Not an easy problem&lt;/h3&gt;&lt;p&gt;And the problem has been difficult to solve. Given that senders set the window size, queues begin to build up at the bottlenecks.  This, thereby, makes it difficult for senders to adjust their sending rate given the constantly changing with conditions (flows coming and going, physical conditions, etc.) that occur in the bandwidth of the bottlenecks.&lt;/p&gt;
+&lt;h3 id=&quot;Reliable-Detection-is-Hard&quot;&gt;&lt;a href=&quot;#Reliable-Detection-is-Hard&quot; class=&quot;headerlink&quot; title=&quot;Reliable Detection is Hard&quot;&gt;&lt;/a&gt;Reliable Detection is Hard&lt;/h3&gt;&lt;p&gt;A large queue is necessary to get started as the buffer needs to initially fill, so queue size really doesn’t give us much information about excess queue.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A good queue is occupancy that goes away in about one RTT; bad queue persists for several RTTs [1]&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&quot;Active-Queue-Management-AQM&quot;&gt;&lt;a href=&quot;#Active-Queue-Management-AQM&quot; class=&quot;headerlink&quot; title=&quot;Active Queue Management (AQM)&quot;&gt;&lt;/a&gt;Active Queue Management (AQM)&lt;/h3&gt;&lt;p&gt;Active Queue Management is the solution for this bufferbloat problem, but it’s lack of widespread adoption has emanated from implementation difficulties and misunderstanding in the overall issue.&lt;/p&gt;
+&lt;h5 id=&quot;AQM-Goals&quot;&gt;&lt;a href=&quot;#AQM-Goals&quot; class=&quot;headerlink&quot; title=&quot;AQM Goals&quot;&gt;&lt;/a&gt;AQM Goals&lt;/h5&gt;&lt;ol&gt;
+&lt;li&gt;Paramaterless - no implementation needed&lt;/li&gt;
+&lt;li&gt;Treats good and bad queue differently&lt;/li&gt;
+&lt;li&gt;Controls delay&lt;/li&gt;
+&lt;li&gt;Adapts to dynamically changing link rates&lt;/li&gt;
+&lt;li&gt;Simple and efficient - from home to enterprise use&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&quot;CoDel-A-proposed-solution&quot;&gt;&lt;a href=&quot;#CoDel-A-proposed-solution&quot; class=&quot;headerlink&quot; title=&quot;CoDel: A proposed solution&quot;&gt;&lt;/a&gt;CoDel: A proposed solution&lt;/h3&gt;&lt;p&gt;CoDel (Contolled Delay Management) is a proposed piece to that solution to this issue of queue management.  It makes three main innovations to it’s algorithm:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Using the local minimum queue to measure standing queue and not based on any of the previously used metrics such as the average size, etc.&lt;/li&gt;
+&lt;li&gt;Keeping a single-state variable measuring how long the minimum have above or below the target for standing queue rather than a window of values to compute the minimum.&lt;/li&gt;
+&lt;li&gt;Using the packet-sojourn time through the queue as the unit of measure as opposed to bytes or packets.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&quot;Why-the-minimum-value&quot;&gt;&lt;a href=&quot;#Why-the-minimum-value&quot; class=&quot;headerlink&quot; title=&quot;Why the minimum value?&quot;&gt;&lt;/a&gt;Why the minimum value?&lt;/h3&gt;&lt;p&gt;The minimum packet sojourn can be decreased only when a packet is dequeued, so CoDel can go to work when packets are dequeued for sending and no locks are needed in the software. If the buffer is full on arrival, then a packet is dropped.&lt;/p&gt;
+&lt;h3 id=&quot;The-target-and-interval&quot;&gt;&lt;a href=&quot;#The-target-and-interval&quot; class=&quot;headerlink&quot; title=&quot;The target and interval&quot;&gt;&lt;/a&gt;The &lt;code&gt;target&lt;/code&gt; and &lt;code&gt;interval&lt;/code&gt;&lt;/h3&gt;&lt;p&gt;The &lt;code&gt;target&lt;/code&gt; represents the “acceptable standing queue delay.”  Very importantly, it’s measured in packet-sojourn time, &lt;strong&gt;not&lt;/strong&gt; bytes or packets. Additionally, it’s unacceptable to drop packets if there are fewer than one MTU of bytes in the buffer.&lt;br&gt;The &lt;code&gt;interval&lt;/code&gt; represents “a time on the order of a worst-case RTT of connections through the bottleneck.”  &lt;/p&gt;
+&lt;h3 id=&quot;Let’s-put-it-together&quot;&gt;&lt;a href=&quot;#Let’s-put-it-together&quot; class=&quot;headerlink&quot; title=&quot;Let’s put it together&quot;&gt;&lt;/a&gt;Let’s put it together&lt;/h3&gt;&lt;p&gt;So, the crux here is that when the queue delay (it’s packet-sojourn time) is more than the &lt;code&gt;target&lt;/code&gt; for at least &lt;code&gt;interval&lt;/code&gt; time, then a packet is dropped and it’s not until the queue delay gets itself back below &lt;code&gt;target&lt;/code&gt; that it stops dropping packets. In it’s dropping mode, it’s ‘next drop time’ is decreased each time as &lt;code&gt;1/SqRt(total_number_of_drops)&lt;/code&gt; with the intention of getting a linear change in throughput (TCP flow rate).&lt;/p&gt;
+&lt;h3 id=&quot;Conclusion&quot;&gt;&lt;a href=&quot;#Conclusion&quot; class=&quot;headerlink&quot; title=&quot;Conclusion&quot;&gt;&lt;/a&gt;Conclusion&lt;/h3&gt;&lt;p&gt;CoDel looks to be the best way to attack queue delay. While not the silver bullet for queue delay, it satisfies the five goals it set out. Manufacturers still need to build and market devices with proper buffer management. &lt;/p&gt;
+&lt;h4 id=&quot;Further-Reading&quot;&gt;&lt;a href=&quot;#Further-Reading&quot; class=&quot;headerlink&quot; title=&quot;Further Reading&quot;&gt;&lt;/a&gt;Further Reading&lt;/h4&gt;&lt;p&gt;&lt;a href=&quot;http://tools.ietf.org/pdf/draft-nichols-tsvwg-codel-02.pdf&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;CoDel IETF Draft&lt;/a&gt;&lt;br&gt;&lt;a href=&quot;http://www.bufferbloat.net/projects/codel/wiki/Wiki/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;CoDel Wiki&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;[1] Nichols and Jacobsen, 2012. &lt;a href=&quot;http://queue.acm.org/detail.cfm?id=2209336&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Controlling Queue Delay&lt;/a&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;This is a survey of the “Controlling Queue Delaty” academic paper by Kathleen Nichols and Van Jacobson from ACMQueue in 2012.[1]&lt;/p&gt;
+&lt;h3 
+    
+    </summary>
+    
+    
+      <category term="Networking" scheme="http://ralucas.github.io/tags/Networking/"/>
+    
+      <category term="TCP" scheme="http://ralucas.github.io/tags/TCP/"/>
+    
+      <category term="Router buffers" scheme="http://ralucas.github.io/tags/Router-buffers/"/>
+    
+      <category term="Bufferbloat" scheme="http://ralucas.github.io/tags/Bufferbloat/"/>
+    
+      <category term="CoDel" scheme="http://ralucas.github.io/tags/CoDel/"/>
+    
+      <category term="Queue delay" scheme="http://ralucas.github.io/tags/Queue-delay/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Understanding Sizing Router Buffers</title>
+    <link href="http://ralucas.github.io/2016/04/17/Understanding-Sizing-Router-Buffers/"/>
+    <id>http://ralucas.github.io/2016/04/17/Understanding-Sizing-Router-Buffers/</id>
+    <published>2016-04-17T06:00:00.000Z</published>
+    <updated>2016-04-20T04:22:36.000Z</updated>
+    
+    <content type="html">&lt;p&gt;This is a survey of the “Sizing Routing Buffers” academic paper by Appenzeller, Keslassy, and McKeown published in 2004.&lt;/p&gt;
+&lt;p&gt;In the past, Internet routers had buffers that used a rule-of-thumb using the equation of: &lt;code&gt;B = RTT X C&lt;/code&gt;.  Where &lt;code&gt;RTT&lt;/code&gt; is the round-trip time of a packet and &lt;code&gt;C&lt;/code&gt; is the data rate.  This rule-of-thumb is no longer useful.  The primary goal of the rule-of-thumb, or any for that matter, is to keep a link as close to 100% utilization as possible, as this maximizes the throughput of the network.&lt;/p&gt;
+&lt;h3 id=&quot;Why-is-it-no-longer-useful&quot;&gt;&lt;a href=&quot;#Why-is-it-no-longer-useful&quot; class=&quot;headerlink&quot; title=&quot;Why is it no longer useful?&quot;&gt;&lt;/a&gt;Why is it no longer useful?&lt;/h3&gt;&lt;blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Large buffers are difficult to manufacture, given that they must use slow, off-chip DRAM for memory buffering. DRAM (dynamic RAM) has some problems.  It has an access time of about 50ns, whereas a packet of size 40bytes, can arrive and depart in 8ns: DRAM is &lt;em&gt;slow&lt;/em&gt; and slows network speed down.  Additionally, they require utilization of a wide DRAM bus, which requires a large number of data pins, which in turn increases the power consumption of the DRAM boards.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Large buffers can contribute to lengthening queueing delays which can in turn cause problems with congestion control algorithms, as they rely on packet loss in order to inform them of TCP congestion.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The original rule-of-thumb came from a 1994 paper and experiments that used a small number of multiplexed flows (up to 8) on a now comparatively low-speed connection of only 40 Mb/s.  Today, for example, typical backbone links are now beginning to operate at 100 Gb/s or greater[2] with many thousand multiplexed flows.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Some consider router buffers to be one of the largest contributors to network traffic speed uncertainty.&lt;/p&gt;
+&lt;h3 id=&quot;Why-is-Overbuffering-bad&quot;&gt;&lt;a href=&quot;#Why-is-Overbuffering-bad&quot; class=&quot;headerlink&quot; title=&quot;Why is Overbuffering bad?&quot;&gt;&lt;/a&gt;Why is Overbuffering bad?&lt;/h3&gt;&lt;blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;In order to accomodate large buffers, routers have to be designed accordingly, leading to larger power consumption, more board space, and lower density.&lt;/li&gt;
+&lt;li&gt;It increases delay when congestion occurs and conflict with low-latency real-time applications like video games.  And in some cases, make applications completely unusable.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;One of the main issues with the idea that a buffer should be utilized to maximize the network throughput is that it doesn’t take into account TCP Congestion Control algorithms that rely on a packet loss to indicate congestion and to go into action. TCP will always make the buffer overflow in order to lead to packet loss.&lt;/p&gt;
+&lt;h3 id=&quot;Single-flow-and-Synchronized-flows&quot;&gt;&lt;a href=&quot;#Single-flow-and-Synchronized-flows&quot; class=&quot;headerlink&quot; title=&quot;Single-flow and Synchronized flows&quot;&gt;&lt;/a&gt;Single-flow and Synchronized flows&lt;/h3&gt;&lt;p&gt;According to the paper, “the key to sizing the buffer is to make sure that the buffer is large enough, so that while the sender pauses, the buffer doesn’t go empty.” In the case of the single, long-lived flow and synchronized TCP flows, for the buffer to never go empty it needs to be half of the window size max. This is because of how TCP performs.  When it TCP sees packet loss, it goes into AIMD congestion control mode and drops it’s packet flow by half. So, while the buffer almost hits zero, it never quite does.&lt;/p&gt;
+&lt;h3 id=&quot;Desynchronized-flows&quot;&gt;&lt;a href=&quot;#Desynchronized-flows&quot; class=&quot;headerlink&quot; title=&quot;Desynchronized flows&quot;&gt;&lt;/a&gt;Desynchronized flows&lt;/h3&gt;&lt;p&gt;Most internet backbones handle enough simultaneous flows, i.e. greater than 500, that they usually operate under a desynchronized flow pattern. In this environment, the TCP sawtooth isn’t synched, so the more flows that are added, the window size from peak to trough is smoothed out and gets smaller.  So, given that as discussed before, that the amount of buffer needed to maintain the network utilization was half of the window max size, then if the window size is now smaller, then &lt;em&gt;therefore&lt;/em&gt; the buffer size can be even smaller.&lt;/p&gt;
+&lt;p&gt;Also, in this case, the flow length distribution is heavily distributed towards long flows, as they typically take up 80% of the bandwidth.  However, most of the flows are in fact from short-lived flows (fewer than 100 packets). But, they only account for about 20% of the bandwidth.  This is partly due because short flows usually don’t get out of TCP slow-start mode and never fully utilize the network bandwidth, whereas long flows typically get into congestion control mode, maximizing the network bandwidth.&lt;/p&gt;
+&lt;h3 id=&quot;Conclusions&quot;&gt;&lt;a href=&quot;#Conclusions&quot; class=&quot;headerlink&quot; title=&quot;Conclusions&quot;&gt;&lt;/a&gt;Conclusions&lt;/h3&gt;&lt;p&gt;Through this survey, it is apparent that smaller buffer sizes are imperative for best network bandwidth utilization no matter the type of flow or flow environment.  Smaller buffers increase bandwidth utilization because they 1) signal to the TCP flow when to go into congestion mode sooner, 2) larger buffers can lead to delay, and 3) are cheaper to manufacture.&lt;/p&gt;
+&lt;p&gt;[1] Appenzaller, Keslassy, McKeown, 2004. &lt;a href=&quot;http://guido.appenzeller.net/pubs/sigcomm.pdf&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;em&gt;Sizing Routing Buffers&lt;/em&gt;&lt;/a&gt;&lt;br&gt;[2] Malik, 2013. &lt;a href=&quot;https://gigaom.com/2013/08/16/100g-200g-400g-internets-core-is-getting-fatter-to-meet-our-tech-planets-bandwidth-demand/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;em&gt;100G, 200G, 400G: Internet’s core is getting fatter to meet our tech planet’s bandwidth demand&lt;/em&gt;&lt;/a&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;This is a survey of the “Sizing Routing Buffers” academic paper by Appenzeller, Keslassy, and McKeown published in 2004.&lt;/p&gt;
+&lt;p&gt;In the pa
+    
+    </summary>
+    
+    
+      <category term="Networking" scheme="http://ralucas.github.io/tags/Networking/"/>
+    
+      <category term="TCP" scheme="http://ralucas.github.io/tags/TCP/"/>
+    
+      <category term="Router buffers" scheme="http://ralucas.github.io/tags/Router-buffers/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Useful CLI commands</title>
+    <link href="http://ralucas.github.io/2015/08/14/Useful-CLI-Commands/"/>
+    <id>http://ralucas.github.io/2015/08/14/Useful-CLI-Commands/</id>
+    <published>2015-08-15T03:37:59.000Z</published>
+    <updated>2015-08-15T03:37:59.000Z</updated>
+    
+    <content type="html">&lt;p&gt;###Some CLI Commands that I’ve found useful:&lt;/p&gt;
+&lt;p&gt;####Viewing processes and killing them&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ lsof -Pi | grep LISTEN&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Displays processes running and ports&lt;/li&gt;
+&lt;li&gt;The PID is the second number (2nd column from left)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ kill -9 $PID&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;This kills the process at the entered PID with extreme prejudice&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;####Using find&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ find . -name &amp;#39;*.css&amp;#39;&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;This will recurse all directories and list all CSS files (and directories ending with “.css”) under the current directory (represented by “.”)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ find . -type f -name &amp;#39;*.css&amp;#39;&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;This will only match CSS files (case-sensitively)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ find . -name &amp;quot;*.css&amp;quot; -exec grep -l &amp;quot;#content&amp;quot; {} \;&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;This example finds all CSS files that do something with your HTML ID #content&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ find . -mtime -1 -type f&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;find files changed in the last 1 day&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ find . \! -path &amp;quot;*CVS*&amp;quot; -type f -name &amp;quot;*.css&amp;quot;&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;find CSS files, omitting results containing “CVS”&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ find ~/src -newer main.css&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;find files newer than main.css in ~/src&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ find . -name \*.css -print0 | xargs -0 grep -nH foo&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;combine with xargs for more power than -exec&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;####Deleting a folder and it’s contents&lt;br&gt;&lt;em&gt;Please use carefully&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ rm -rf [folder_name]&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Always include a folder name&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;####Copying a folder and contents&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ cp -avr /from/folder /to/new_folder&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;-a : Preserve the specified attributes such as directory an file mode, ownership, timestamps, if possible additional attributes: context, links, xattr, all.&lt;/li&gt;
+&lt;li&gt;-v : Explain what is being done (verbose).&lt;/li&gt;
+&lt;li&gt;-r : Copy directories recursively.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;####What is grep&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It is a command that finds text/strings inside of files&lt;/li&gt;
+&lt;li&gt;It can take regular expressions&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;####Make a file (…for testing…)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;mkfile command&lt;/li&gt;
+&lt;li&gt;input number, then size (i.e. k for kb or g for gb), then filename&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ mkfile -n [size][b|k|m|g] [filename]&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&quot;Heroku-commands&quot;&gt;&lt;a href=&quot;#Heroku-commands&quot; class=&quot;headerlink&quot; title=&quot;Heroku commands&quot;&gt;&lt;/a&gt;Heroku commands&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Get to the console/bash on the remote server&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;$ heroku run bash --app [put_app_name_here]&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&quot;Compiling-bash-scripts&quot;&gt;&lt;a href=&quot;#Compiling-bash-scripts&quot; class=&quot;headerlink&quot; title=&quot;Compiling bash scripts&quot;&gt;&lt;/a&gt;Compiling bash scripts&lt;/h4&gt;&lt;p&gt;&lt;code&gt;$ chmod +x ./[bash_script.sh]&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&quot;Redirect-to-port-80-on-linux-server&quot;&gt;&lt;a href=&quot;#Redirect-to-port-80-on-linux-server&quot; class=&quot;headerlink&quot; title=&quot;Redirect to port 80 on linux server&quot;&gt;&lt;/a&gt;Redirect to port 80 on linux server&lt;/h4&gt;&lt;p&gt;&lt;code&gt;$ sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3000&lt;/code&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;###Some CLI Commands that I’ve found useful:&lt;/p&gt;
+&lt;p&gt;####Viewing processes and killing them&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ lsof -Pi | grep LISTEN&lt;/code&gt;&lt;/
+    
+    </summary>
+    
+    
+      <category term="CLI" scheme="http://ralucas.github.io/tags/CLI/"/>
+    
+      <category term="Linux" scheme="http://ralucas.github.io/tags/Linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Resizing image with imagemagick</title>
+    <link href="http://ralucas.github.io/2015/08/11/Resizing-image-with-imagemagick/"/>
+    <id>http://ralucas.github.io/2015/08/11/Resizing-image-with-imagemagick/</id>
+    <published>2015-08-12T03:46:31.000Z</published>
+    <updated>2015-08-12T03:46:31.000Z</updated>
+    
+    <content type="html">&lt;h4 id=&quot;Quick-one-liner&quot;&gt;&lt;a href=&quot;#Quick-one-liner&quot; class=&quot;headerlink&quot; title=&quot;Quick one-liner&quot;&gt;&lt;/a&gt;Quick one-liner&lt;/h4&gt;&lt;p&gt;Using imagemagick to resize an image, keep it’s proportion (i.e. 4 x 3 ), and place it in the middle with a white background:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;convert input.png -resize 1280x800 -background white -gravity center -extent 1280x800 output.png&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;</content>
+    
+    <summary type="html">
+    
+      &lt;h4 id=&quot;Quick-one-liner&quot;&gt;&lt;a href=&quot;#Quick-one-liner&quot; class=&quot;headerlink&quot; title=&quot;Quick one-liner&quot;&gt;&lt;/a&gt;Quick one-liner&lt;/h4&gt;&lt;p&gt;Using imagemagick 
+    
+    </summary>
+    
+    
+      <category term="imagemagick" scheme="http://ralucas.github.io/tags/imagemagick/"/>
+    
+      <category term="resizing images" scheme="http://ralucas.github.io/tags/resizing-images/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Mocking out the Request module in Node.js for Testing</title>
+    <link href="http://ralucas.github.io/2015/08/10/Mocking-out-the-request-module-for-testing/"/>
+    <id>http://ralucas.github.io/2015/08/10/Mocking-out-the-request-module-for-testing/</id>
+    <published>2015-08-11T05:09:26.000Z</published>
+    <updated>2015-08-11T05:09:26.000Z</updated>
+    
+    <content type="html">&lt;p&gt;So, recently I needed to write a test that required that I mock the request module out as I wanted to pass a specific error code back to the response handler and do something different with it.  In this case, I wanted to retry the request.&lt;/p&gt;
+&lt;p&gt;I first attacked the issue with Sinon.js library.  If you’ve ever tested in javascript, sinon.js is an indispensable mocking and spying library.&lt;/p&gt;
+&lt;p&gt;So, I wrote:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;var request = require(&amp;apos;request&amp;apos;),&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;before(done) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  stub = sinon.stub(request)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    .withArgs(&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      method: &amp;apos;GET&amp;apos;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      url: &amp;apos;http://example.com&amp;apos;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  done();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;However, that doesn’t work as sinon.js requires if you’re stubbing out a module for there to be method that you use, i.e. &lt;code&gt;stub = sinon.stub(request, &amp;#39;get&amp;#39;)&lt;/code&gt; … &lt;a href=&quot;http://stackoverflow.com/questions/27462799/sinon-how-to-stub-nested-function&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;see this StackOverflow issue&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The problem was that the api that I was testing had already largely been written and I didn’t now want to rewrite a bunch of it just to make it testable for this one case.  So, enter &lt;a href=&quot;https://github.com/mfncooper/mockery&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mockery&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Mockery is great in this instance, but be careful when you use it as it tears down the &lt;code&gt;require&lt;/code&gt; statement, so use it as tightly as you can and tear it down immediately after use.  So, I separated out my test:&lt;/p&gt;
+&lt;p&gt;myModule.js:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;var request = require(&amp;apos;request&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;function handler(callback) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  return function(err, res, body) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    if (err) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      //doStuff&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    ...//doOtherStuff&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;exports.getSomeStuff = function(url, callback) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  return request(&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    method: &amp;apos;GET&amp;apos;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    url: url&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;, handler(callback));&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;test.js:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;40&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;41&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;42&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;43&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;44&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;var request = require(&amp;apos;request&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;...&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; describe(&amp;apos;request error testing&amp;apos;, function() &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    var stub, module;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    before(function(done) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      mockery.enable(&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        warnOnReplace: false,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        warnOnUnregistered: false,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        useCleanCache: true&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      &amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      stub = sinon.stub();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      mockery.registerMock(&amp;apos;request&amp;apos;, stub);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      mm = require(&amp;apos;./myModule&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      done();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    after(function(done) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      mockery.disable();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      done();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    it(&amp;apos;should retry once on ETIMEDOUT error&amp;apos;, function(done) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      var spy = sinon.spy(client, &amp;apos;request&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      var err = new Error(&amp;apos;connect ETIMEDOUT&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      stub.yields(err, null, null);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      mm.getSomeStuff(&amp;apos;http://example.com&amp;apos;, function(err, json) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        expect(spy.calledOnce).to.be.true;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        expect(stub.calledTwice).to.be.true;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        expect(err.message).to.include(&amp;apos;ETIMEDOUT&amp;apos;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        done();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      &amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;So, there you have it. Comment if you have any thoughts or questions.&lt;/p&gt;
+&lt;p&gt;Another really great post that helped me: &lt;a href=&quot;http://bulkan-evcimen.com/using_mockery_to_mock_modules_nodejs.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://bulkan-evcimen.com/using_mockery_to_mock_modules_nodejs.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Cheers!&lt;/p&gt;
+&lt;p&gt;Richard&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;So, recently I needed to write a test that required that I mock the request module out as I wanted to pass a specific error code back to 
+    
+    </summary>
+    
+    
+      <category term="Testing" scheme="http://ralucas.github.io/tags/Testing/"/>
+    
+      <category term="Node.js" scheme="http://ralucas.github.io/tags/Node-js/"/>
+    
+      <category term="Request" scheme="http://ralucas.github.io/tags/Request/"/>
+    
+      <category term="Mockery" scheme="http://ralucas.github.io/tags/Mockery/"/>
+    
+      <category term="Sinon.js" scheme="http://ralucas.github.io/tags/Sinon-js/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Importing CSV in Postgres</title>
+    <link href="http://ralucas.github.io/2013/12/10/Importing-CSV-in-Postgres/"/>
+    <id>http://ralucas.github.io/2013/12/10/Importing-CSV-in-Postgres/</id>
+    <published>2013-12-11T01:19:18.000Z</published>
+    <updated>2015-02-02T01:19:50.000Z</updated>
+    
+    <content type="html">&lt;p&gt;Log into the database from the terminal:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ psql database_name&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Create a new table:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;# CREATE TABLE table_name(column_name data_type, column_name2 data_type, etc);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;example:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;# CREATE TABLE trips(block_id int,route_id &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;text,direction_id int,trip_headsign text,shape_id text,service_id text,trip_id text);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;//And then you should see:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;CREATE TABLE&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Copy the data from a CSV:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;# COPY table_name FROM &amp;apos;/path/to/CSV_file.txt&amp;apos; DELIMITER &amp;apos;,&amp;apos; CSV;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;example:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;# COPY trips FROM &amp;apos;/home/username/Downloads/data/trips.txt&amp;apos; DELIMITER &amp;apos;,&amp;apos; CSV;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;//And then you should see:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;COPY XXXX &amp;lt;-number of lines&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;View the tables and select the table you wish to view:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;# \dt&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;# SELECT * FROM table_name;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Cheers!&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Log into the database from the terminal:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span
+    
+    </summary>
+    
+    
+      <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
+    
+      <category term="CSV" scheme="http://ralucas.github.io/tags/CSV/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Installing Postgres on Linux Mint</title>
+    <link href="http://ralucas.github.io/2013/12/01/Installing-Postgres-on-Linux-Mint/"/>
+    <id>http://ralucas.github.io/2013/12/01/Installing-Postgres-on-Linux-Mint/</id>
+    <published>2013-12-02T01:10:59.000Z</published>
+    <updated>2015-02-02T03:25:55.000Z</updated>
+    
+    <content type="html">&lt;p&gt;###A Quick Guide&lt;/p&gt;
+&lt;h2 id=&quot;&quot;&gt;&lt;a href=&quot;#&quot; class=&quot;headerlink&quot; title=&quot;&quot;&gt;&lt;/a&gt;&lt;img src=&quot;http://t0.gstatic.com/images?q=tbn:ANd9GcSedctFKvhSpQSI7ZU3X5Xh91EPfEL3J4FP2j_MVksu_isCcDURqw&quot; alt=&quot;&quot;&gt;&lt;/h2&gt;&lt;p&gt;Open up the terminal:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ sudo apt-get install postgresql&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Installs Postgresql.  This will take a few minutes.&lt;/p&gt;
+&lt;p&gt;Next:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ sudo su - postgres&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;This logs you into the database as the postgres user.  You will then want to create yourself as a user:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ createuser your_username&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Now, at the command prompt under your username, you are able to use createdb and other commands.  So, let’s create a quick database and connect to it.&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ createdb myFirstDb&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Connect to it:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ psql myFirstDb&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;You will then see a prompt that will look like:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;myFirstDb=#&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;#&lt;/code&gt; indicates that you are the superuser, which is most likely if you just installed postgres on your local computer.&lt;/p&gt;
+&lt;p&gt;Let’s run:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;myFirstDb=# SELECT Version();&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;This should go into a new screen on your terminal that should look something like this:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;                                                version                                                &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;-------------------------------------------------------------------------------------------------------&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt; PostgreSQL 9.1.10 on i686-pc-linux-gnu, compiled by gcc (Ubuntu/Linaro 4.8.1-10ubuntu7) 4.8.1, 32-bit&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;(1 row)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;(END)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Type &lt;code&gt;q&lt;/code&gt; to exit the screen and go back to the &lt;code&gt;#&lt;/code&gt; prompt.&lt;/p&gt;
+&lt;p&gt;You can run commands from the &lt;code&gt;#&lt;/code&gt; prompt using &lt;code&gt;\&lt;/code&gt; notation and the official documentation on commands can be found here: &lt;a href=&quot;http://www.postgresql.org/docs/9.3/interactive/app-psql.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://www.postgresql.org/docs/9.3/interactive/app-psql.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;If you want a GUI client:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ sudo apt-get install pgadmin3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;###A Quick Guide&lt;/p&gt;
+&lt;h2 id=&quot;&quot;&gt;&lt;a href=&quot;#&quot; class=&quot;headerlink&quot; title=&quot;&quot;&gt;&lt;/a&gt;&lt;img src=&quot;http://t0.gstatic.com/images?q=tbn:ANd9GcSedctFKvhSp
+    
+    </summary>
+    
+    
+      <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
+    
+      <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Using Crockford&#39;s supplant function in Javascript</title>
+    <link href="http://ralucas.github.io/2013/11/01/Using-Crockford-s-supplant-function-in-Javascript/"/>
+    <id>http://ralucas.github.io/2013/11/01/Using-Crockford-s-supplant-function-in-Javascript/</id>
+    <published>2013-11-02T00:09:07.000Z</published>
+    <updated>2015-02-02T01:10:14.000Z</updated>
+    
+    <content type="html">&lt;p&gt;The supplant function is easy to use for string interpolation and a nice introduction templating in JavaScript.&lt;/p&gt;
+&lt;p&gt;Here’s the function from &lt;a href=&quot;http://javascript.crockford.com/remedial.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Douglas Crockford’s website&lt;/a&gt;:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;if (!String.prototype.supplant) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  String.prototype.supplant = function (o) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    return this.replace(/\&amp;#123;([^&amp;#123;&amp;#125;]*)\&amp;#125;/g,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    function (a, b) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      var r = o[b];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      return typeof r === &amp;apos;string&amp;apos; || typeof r === &amp;apos;number&amp;apos; ? r : a;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;So how is it used.  Here’s a quick example:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;var greeting = &amp;quot;Hi, I&amp;#39;m {name}&amp;quot;.supplant[{name:&amp;quot;Richard&amp;quot;}];&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Output: “Hi, I’m Richard”&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Another example:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;myObj = &amp;#123; &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  name: &amp;apos;Richard&amp;apos;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  city: &amp;apos;Columbus&amp;apos;,&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  state: &amp;apos;Ohio&amp;apos;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;var myInfo = &amp;quot;Hi, my name is &amp;#123;name&amp;#125; and I&amp;apos;m from &amp;#123;city&amp;#125;, &amp;#123;state&amp;#125;&amp;quot;.supplant(myObj);&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;em&gt;Output: “Hi, my name is Richard and I’m from Columbus, Ohio”&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;You can use it with arrays:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;var names = [&amp;quot;Richard&amp;quot;, &amp;quot;Yalcin&amp;quot;, &amp;quot;Dan&amp;quot;, &amp;quot;Mike&amp;quot;, &amp;quot;Kerry&amp;quot;];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;var classmates = &amp;quot;My classmates are &amp;#123;0&amp;#125;, &amp;#123;1&amp;#125;, &amp;#123;2&amp;#125;, &amp;#123;3&amp;#125;, and &amp;#123;4&amp;#125;&amp;quot;.supplant(names);&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;em&gt;Output: “My classmates are Richard, Yalcin, Dan, Mike, and Kerry”&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;These are a few examples, hopefully you do find them helpful. Supplant does take some criticism for being inefficient as well as unescapable, which are both founded. So, you may want to use supplant sparingly, but it’s certainly a great tool in learning JavaScript.&lt;/p&gt;
+&lt;p&gt;Here’s a &lt;a href=&quot;http://stackoverflow.com/questions/1408289/best-way-to-do-variable-interpolation-in-javascript&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;stack overflow post&lt;/a&gt; that discusses it further as well.&lt;/p&gt;
+&lt;p&gt;And as you delve deeper into string interpolation and templating, I suggest looking into &lt;a href=&quot;http://www.handlebarsjs.com&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Handlebars.js&lt;/a&gt; or &lt;a href=&quot;http://mustache.github.io/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mustache&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;As always, if you have any questions, please don’t hesitate to ask.&lt;/p&gt;
+&lt;p&gt;Cheers!&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;The supplant function is easy to use for string interpolation and a nice introduction templating in JavaScript.&lt;/p&gt;
+&lt;p&gt;Here’s the functio
+    
+    </summary>
+    
+    
+      <category term="JavaScript" scheme="http://ralucas.github.io/tags/JavaScript/"/>
+    
+      <category term="Supplant" scheme="http://ralucas.github.io/tags/Supplant/"/>
+    
+      <category term="Templating" scheme="http://ralucas.github.io/tags/Templating/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Late Fragment by Raymond Carver</title>
+    <link href="http://ralucas.github.io/2013/07/01/Late-Fragment-by-Raymond-Carver/"/>
+    <id>http://ralucas.github.io/2013/07/01/Late-Fragment-by-Raymond-Carver/</id>
+    <published>2013-07-02T00:05:36.000Z</published>
+    <updated>2015-02-02T01:43:40.000Z</updated>
+    
+    <content type="html">&lt;p&gt;Great poem by one of my favorite writers.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Late Fragment&lt;br&gt;by Raymond Carver&lt;/p&gt;
+&lt;p&gt;And did you get what&lt;br&gt;you wanted from this life, even so?&lt;br&gt;I did.&lt;br&gt;And what did you want?&lt;br&gt;To call myself beloved, to feel myself&lt;br&gt;beloved on the earth.&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Great poem by one of my favorite writers.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Late Fragment&lt;br&gt;by Raymond Carver&lt;/p&gt;
+&lt;p&gt;And did you get what&lt;br&gt;you wante
+    
+    </summary>
+    
+    
+      <category term="Raymond Carver" scheme="http://ralucas.github.io/tags/Raymond-Carver/"/>
+    
+      <category term="Poem" scheme="http://ralucas.github.io/tags/Poem/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Cleveland Marathon Race Report</title>
+    <link href="http://ralucas.github.io/2013/06/01/Cleveland-Marathon-Race-Report/"/>
+    <id>http://ralucas.github.io/2013/06/01/Cleveland-Marathon-Race-Report/</id>
+    <published>2013-06-02T00:06:57.000Z</published>
+    <updated>2015-02-02T03:25:42.000Z</updated>
+    
+    <content type="html">&lt;p&gt;This past Sunday, I ran in the Cleveland Marathon.  I’d been training for the past 4-6 months for the race.  So, how did it go?  Well, I finished with a 3:43 time, so reasonably well.  I beat my goal time of 3:45 by a couple of minutes, so overall I’m quite happy with the results.&lt;/p&gt;
+&lt;p&gt;As I’ve mentioned earlier, I’ve been quite worried that my right foot was going to bother me the entire race, but after about 2 miles or so, it went away or I completely forgot about it.&lt;/p&gt;
+&lt;p&gt;####My race plan:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Start out a little slow at a 9-minute pace for the first few miles and then begin to speed up.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Try to speed up in the second half of the race for a negative split.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Try to speed up after mile 16, in which the majority of the course would be heading down.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;For the most part I stuck to this plan.  I ran easy in the beginning and sped up a little, hitting the half marathon point at 1:50.  I then actually did speed up for the next split at 30K, doing a 8:17 split.  I was on pace and I was feeling great.  We were running through Rockefeller park, underneath the shade, and it was perfect.  But, then I started to slow up, particularly around mile 22.  This seemed to be the loneliest, hottest stretch of the race.  It was around I-90, there weren’t too many folks around, no shade and it was a long uphill.  That was a battle.  Between miles 21 and 25, I was really struggling.  My heart was working hard and I was really starting to feel it.  At the mile 23 water stop, I actually did stop to walk through it taking both a Powerade and water.  I walked for a minute or so, but knew I needed to get going.  Those couple of miles between 23 and 25, as I could see the downtown in the distance were tough miles.  I tried to gut it out, keeping a 9:15 pace going.  When I reached one mile to go, I tried to give it all I had and really got going up to speed with about a half mile to go.  And I made it with a good time.&lt;/p&gt;
+&lt;p&gt;####My nutrition plan:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Clif Shot Blocks - eat one every two miles just before the water station and get some water to wash it down.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Then switch to the Honey Stingers - I broke these up and put them in a little ziplock bag.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;I stuck to the plan. I took one package (6 pieces) of the Shot Blocks, so for the first twelve miles I did that and then switched over to the Honey Stingers for the second half.  I think it worked for the most part as I didn’t have any noticeable sugar fall-outs in the race.  I think for the next race I’m just going to do two packages of the Shot Blocks as I was a little uncertain about how much of the Honey Stingers I was getting in.  The Shot Blocks are just nicely dosed, so they’re easier to manage.&lt;/p&gt;
+&lt;p&gt;My time and splits: &lt;a href=&quot;http://live.xacte.com/cleveland/?id=110&amp;amp;tagcode=1458&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://live.xacte.com/cleveland/?id=110&amp;amp;tagcode=1458&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;####Takeaways from the race:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;My training over the 4-6 months prior was worth all the work.&lt;/li&gt;
+&lt;li&gt;In particular, I really believe the weekly speed/interval training that I did was key for me maintaining my pace.&lt;/li&gt;
+&lt;li&gt;My nutrition was solid and I like the Clif Shots, so I think I may go to those only for a race.&lt;/li&gt;
+&lt;li&gt;There’s still some room for improvement and I’m going to move up my new goal to 3:30:&lt;ul&gt;
+&lt;li&gt;I’m going to move my training pace up by 30 seconds to 9:30 pace.&lt;/li&gt;
+&lt;li&gt;I need to stay on track with my weekly speed work and look into potentially adding a second day per week of speed work.&lt;/li&gt;
+&lt;li&gt;I need to find a way to train myself better both physically and mentally for those difficult miles: 21-25.&lt;/li&gt;
+&lt;li&gt;Begin training for the 50-mile ultramarathon (My hypothesis is that by training for a longer race, I will be able to easily run a shorter one).&lt;/li&gt;
+&lt;li&gt;Take the VO2 Max test&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;This past Sunday, I ran in the Cleveland Marathon.  I’d been training for the past 4-6 months for the race.  So, how did it go?  Well, I 
+    
+    </summary>
+    
+    
+      <category term="Marathon" scheme="http://ralucas.github.io/tags/Marathon/"/>
+    
+      <category term="Cleveland" scheme="http://ralucas.github.io/tags/Cleveland/"/>
+    
+      <category term="Race Report" scheme="http://ralucas.github.io/tags/Race-Report/"/>
+    
+      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>How I&#39;ve trained for a marathon</title>
+    <link href="http://ralucas.github.io/2013/06/01/How-I-ve-trained-for-a-marathon/"/>
+    <id>http://ralucas.github.io/2013/06/01/How-I-ve-trained-for-a-marathon/</id>
+    <published>2013-06-01T23:57:43.000Z</published>
+    <updated>2015-02-02T01:07:24.000Z</updated>
+    
+    <content type="html">&lt;p&gt;I began really back in the summer of 2012, when I started training for the Columbus half-marathon and then the Whitney climb.  After I ran the half, I continued running, and in talking with a co-worker who had experience in marathoning, I began planning a winter marathon.  My initial plan was to run either the Jackson, MS or Baton Rouge/Louisiana Marathon, which were both taking place in January of 2013, I believe.&lt;/p&gt;
+&lt;p&gt;So, I found &lt;a href=&quot;http://www.halhigdon.com/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Hal Higdon’s site&lt;/a&gt; and began following one of his plans. The site has plans for any level and a lot of great advice.  So, I started increasing my mileage, eventually doing a 22 mile run. This was all in November/December of 2012.  It was cold. I can remember doing the 22-mile run, not feeling super great upon embarkation, but doing it anyhow.  And I was only taking with me a water belt, with one gatorade and one water bottle, and a peanut butter and jelly sandwich.  Not enough really.  So, by the end of the run, I was dead tired, leg muscles cramping, and actually had to stop and walk and few times (really no big deal, but still not what I was hoping for). I was unprepared and probably pushed my body when I wasn’t feeling it.&lt;/p&gt;
+&lt;p&gt;During this time, I did decide to join a local running group, which began it’s ‘Winter Session’ in January.  This was fine as I was going to do a spring marathon anyways and my goal was (and still is) 3 marathons in 2013.  Joining the Marathoners-in-training group here in Columbus, for me, has been really great.  I’ve learned a ton about best training practices and regimens, proper nutrition, pacing, and I’ve met a bunch of kind, like-minded folks.&lt;/p&gt;
+&lt;p&gt;So, how I’ve trained:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;I started back in January for a May race, so 4 solid months, and I had some decent fitness already.  If you don’t, you may want to give yourself some more time and begin to build a stronger base.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;My target pace is 8:30, which I think is doable, given my results in the half-marathon at a better pace (8:20).  Now that’s not significantly better than 8:30, but I’m hoping that given my training, I can hit it.  Prior to this January, I used to run at a much faster pace, 9-minute or faster.  Now all my runs are usually at around 10-minute pace as it was recommended that the rule of thumb for pacing is to run most of your practice runs at 60-90 seconds slower than your goal marathon pace.  One reason, I believe, for going a little slower is to build up your base.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;I tried a variety of foods while running: Clif Shot Blocks, GU, Gatorade gels, Gummy Bears, Honey Stingers, Peanut Butter and Jelly Sandwich, Chews, Buddy Fruits, Powerbars, and any number of protein bars.  So, my favorites for running are the Clif Shot Blocks (usually Strawberry flavor) and the Honey Stingers.  The GU and Gummy bears did not sit well with me, and I think they’re just too much sugar, too quickly, even if I do try to offset with some water.  I could probably drink more water with them, but I just really like the shot blocks and stingers.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;I’m still struggling on finding the right pair of shoes.  The primary reason is my feet are flat and so I overpronate.  I’ve been using/comparing the Asics Gel Kayano and the Nike Lunar Eclipse.  The real discovery for me has unfortunately come at the end of training, as now the ball of my right foot has begun to ache with the Metarsalgia I thought that I had gotten through.  You can read more about it &lt;a href=&quot;http://rangeandroam.com/my-pain-in-the-ball-of-the-foot-from-running/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;So, there you go.  Let me know if you have any suggestions or comments on how I could be doing this better.  Thanks.&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;I began really back in the summer of 2012, when I started training for the Columbus half-marathon and then the Whitney climb.  After I ra
+    
+    </summary>
+    
+    
+      <category term="Marathon" scheme="http://ralucas.github.io/tags/Marathon/"/>
+    
+      <category term="Cleveland" scheme="http://ralucas.github.io/tags/Cleveland/"/>
+    
+      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Running Pains</title>
+    <link href="http://ralucas.github.io/2013/05/14/Running-Pains/"/>
+    <id>http://ralucas.github.io/2013/05/14/Running-Pains/</id>
+    <published>2013-05-14T18:00:00.000Z</published>
+    <updated>2015-02-02T01:02:19.000Z</updated>
+    
+    <content type="html">&lt;p&gt;I’m just going to preface this post by saying I’m not a doctor, so this is simply my own experience.  If you’re feeling foot pain you should see a doctor.&lt;/p&gt;
+&lt;p&gt;So, over the past year or so, since I’ve really started running in earnest and outside a lot more, I’ve developed an intermittent pain in the ball of my foot.  Last year, it was on my left foot, but now it has migrated to my right foot.  When it happened last year, I got worried that maybe it was a stress fracture, so I went to the podiatrist right away.  He gave the foot an X-ray and it wasn’t fractured.  He told me, he thought it was a neuroma or metatarsalgia.  And suggested, given my flat feet, I really should get custom orthotics.  I still haven’t done that.&lt;/p&gt;
+&lt;p&gt;Nonetheless, I took some time off, began running more, and the pain really ended up going away.  It didn’t come back until I decided, being the smart guy that I am, that I needed to break in a new pair of running shoes for the upcoming marathon.  And so on about the 3rd or 4th run, I started getting that dull, ball of the foot pain around the 2nd and 3rd toe.  A real bummer.  And now as I’m getting ready to run here this coming Sunday, my foot is still bothering a bit.  Hopefully, I’ll be fine for most of the race and I’m going to just tough it out if it does bother me.  It’s really not bad, just sort of a bothersome ache/pain.&lt;/p&gt;
+&lt;p&gt;Here’s what I’ve learned, but don’t hold me to this:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Need to make sure the toe box in the shoe is good and roomy.  I’m going to try a new tying method.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A new pair of shoes can potentially cause re-inflammation.  Don’t break in a pair of shoes with a month to go in training.  I actually thought I’d be fine.  Lesson learned.  Start out with a couple (or more) pairs.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;I probably should have done a bit more cross-training near the end when my foot was bothering me and I’m going to try that this summer, should it happen again.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;I’m just going to preface this post by saying I’m not a doctor, so this is simply my own experience.  If you’re feeling foot pain you sho
+    
+    </summary>
+    
+    
+      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
+    
+      <category term="Injury" scheme="http://ralucas.github.io/tags/Injury/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Tough Mudder Review</title>
+    <link href="http://ralucas.github.io/2013/05/01/Tough-Mudder-Review/"/>
+    <id>http://ralucas.github.io/2013/05/01/Tough-Mudder-Review/</id>
+    <published>2013-05-01T23:46:15.000Z</published>
+    <updated>2015-02-02T03:24:57.000Z</updated>
+    
+    <content type="html">&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447221/262292_10151580137014630_246172225_n_uxcfmr.jpg&quot; alt=&quot;The Tough Mudder Group&quot;&gt;&lt;/p&gt;
+&lt;p&gt;So, I did the Tough Mudder here in Ohio this past Saturday with my sister and a couple of people that joined our team after I put up forum post for team members.  It was held in Mansfield, OH about an hour north of Columbus.&lt;/p&gt;
+&lt;p&gt;My sister and I signed up for it, not really knowing much about it, back in the fall of last year.  I had heard a friend mention it and I thought that it sounded like a good challenge.  It costs us, I believe, around $120 to do the event.&lt;/p&gt;
+&lt;p&gt;The Tough Mudder is basically an obstacles course with muddy terrain and is part of the growing phenomenon of these obstacle-type runs that seem to be popping up everywhere.  It took place at what seemed to be a farm near Mansfield, Ohio. It’s a ten mile course and they had 22 obstacles.  They range from crawling under barb wire for 15 feet to climbing over walls that are 15 feet to just running/walking through a muddy path.  Some of the obstacles can be a bit tough, particularly as the day wears on.&lt;/p&gt;
+&lt;p&gt;My sister and I signed up, but we needed to get more team members.  Unfortunately, we couldn’t convince any of our friends to join us, so we put up a post on the forums and Adriana and Bob responded to join our team.  We really couldn’t have asked for better teammates.  They were great.&lt;/p&gt;
+&lt;p&gt;Okay, so we trained and then finally came the day of the event.  The emails from the organization told us to try to arrive 2 hours earlier than your start time.  Being an unbeliever in showing up too early for anything, we blew that off and decided to show up an hour early.  Well, we should have listened to them.  There was a huge crowd, traffic, parking lines, and then we got bussed to the race field.  We estimated that if they had about 9,000 participants per day going through the course.  That’s quite a bit. We ended up arriving about 40 minutes late.  So, we should have taken that 2 hours prior a bit more seriously.&lt;/p&gt;
+&lt;p&gt;We really lucked out, though: it was a beautiful day - mid-60s and sunny. Upon arriving, we located Bob and Adriana and jetted off to start of the race. Before beginning, the MC gave a 20 minute speech, trying to rile everyone up, going over the standards and rules, and of course, not forgetting to mention all of the corporate sponsors.  And then finally, we were off.&lt;/p&gt;
+&lt;p&gt;The total time we spent out on the course was about 4-1/2 hours, which is basically the equivalent of a marathon time-wise.  For the most part, we tried to run/jog between the obstacles, giving into a walk when the mud became particularly heavy.  And the mud was heavy for the most part and it was everywhere.  Tying your shoes on tight is essential if you want to keep them on.&lt;/p&gt;
+&lt;p&gt;Bob was the only team member to have successfully completed all the obstacles.  I felt like I did fairly well, only being unable to get past the monkey bars (my excuse: hands were too wet and slipped). Adriana completed the monkey bars successfully and was told that she was one of the few women to have accomplished that. And my sister had a lot of success and attempted every obstacle.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Toughest obstacle:&lt;/strong&gt; Berlin Walls - Part of the reason was that I initially attempted this solo and didn’t make it.  Fortunately some fellows helped me over, but it was still rough pulling myself over the walls.&lt;/p&gt;
+&lt;p&gt;As we neared the last 5 or 6 obstacles, lines began to grow and getting through the obstacles began to take more and more time.  This was a bit of a detractor and I thought that perhaps they should begin to limit the amount of people on the course per day as it really seemed like too many.&lt;/p&gt;
+&lt;p&gt;I will say this, I was sore for about two days after it and even now have large bruises under my arms from lifting myself up on the walls.&lt;/p&gt;
+&lt;p&gt;In terms of training, the Tough Mudder website has some training suggestions, but I didn’t really attempt them. I felt that they were too difficult and crazy to attempt at the gym.  My training was basically train for a marathon and I also did some weightlifting, swimming, and some of the DVD Insanity.  So, I would do a workout of either weights, swim, or DVD in the morning and then do my mileage of running in the evenings.  This is probably more than most people would have time to do, so I think that if you’re just maintaining a healthy running schedule with some weight training thrown in there, you would be fine and no need to workout twice a day, either.&lt;/p&gt;
+&lt;p&gt;My conclusion: We had a fun time out there, got great weather, and met a couple of good folks.  I don’t think I would do it again because, well, I guess I don’t see what the big deal about it is.  Surely, it taxed me physically, but I didn’t feel like it was truly an intense physical experience.  Certain obstacles were difficult, but the majority of them were very reasonable for anyone in decent shape to complete.  If I was more flexible, the wall climbing may have been easier.  I think, for myself, I didn’t really get that feeling of accomplishment and perhaps this was because I’ve had my sights on the completion of an upcoming marathon and then some mountain hiking.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447227/943123_10151580136954630_1928244936_n_cexmv2.jpg&quot; alt=&quot;Hooray!&quot;&gt;&lt;/p&gt;
+&lt;p&gt;My recommendation would be, definitely do it if you feel like this would be something that you would enjoy and you’ve got a good group to do it with, but if you’re doing it to prove something to yourself, I think there are more difficult physical challenges out there.  Thanks for reading this.&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447221/262292_10151580137014630_246172225_n_uxcfmr.jpg&quot; alt=&quot;The Tough Mudder 
+    
+    </summary>
+    
+    
+      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
+    
+      <category term="Tough Mudder" scheme="http://ralucas.github.io/tags/Tough-Mudder/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Advice from my mistakes</title>
+    <link href="http://ralucas.github.io/2013/01/01/Advice-from-my-mistakes/"/>
+    <id>http://ralucas.github.io/2013/01/01/Advice-from-my-mistakes/</id>
+    <published>2013-01-02T00:43:13.000Z</published>
+    <updated>2015-02-02T00:43:57.000Z</updated>
+    
+    <content type="html">&lt;ol&gt;&lt;br&gt;  &lt;li&gt;Don’t stay in a job you don’t like. Quit or begin looking immediately. Even if you’ve only been there for less than year, get out.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Always work hard and give your best, even if you don’t want to or others don’t seem to appreciate it.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Don’t buy a house unless you have a family, need the room, and plan on staying in the same city for 10 years or more.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Trust your gut.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Read a lot of different books, fiction, non-fiction, religious, whatever floats your boat, read a book about it, then read about something else until you find something you’re interested in.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Don’t watch too much television or Netflix.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Get professional certifications early and make your company pay for them. They may be meaningless, but a lot of hiring folks think they’re something.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Get outside and be active. Hike, camp, fish, run, play a sport, something, it doesn’t matter, just get out there.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Stop reading the dopey news on the internet. It’s probably false anyways.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Master something.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Volunteer.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Get a part-time job or start a side-business.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Accomplish a big goal every year that requires preparation, e.g. run a marathon, start a company, etc.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Don’t fret over your mistakes for too long. Take the hit (no matter how bad) and move on.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Try to think outside yourself. How are others doing and dealing with life? It really takes the burden off.&lt;/li&gt;&lt;br&gt;&lt;/ol&gt;</content>
+    
+    <summary type="html">
+    
+      &lt;ol&gt;&lt;br&gt;  &lt;li&gt;Don’t stay in a job you don’t like. Quit or begin looking immediately. Even if you’ve only been there for less than year, get 
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Mt. Whitney via Mountaineer&#39;s Route</title>
+    <link href="http://ralucas.github.io/2012/10/01/Mt-Whitney-via-Mountaineer-s-Route/"/>
+    <id>http://ralucas.github.io/2012/10/01/Mt-Whitney-via-Mountaineer-s-Route/</id>
+    <published>2012-10-01T23:37:15.000Z</published>
+    <updated>2015-02-02T03:16:47.000Z</updated>
+    
+    <content type="html">&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1422844474/DSC00190_o01n7g.jpg&quot; alt=&quot;Summit of Mt. Whitney&quot;&gt;&lt;/p&gt;
+&lt;p&gt;Well, here I am on the summit of Mt. Whitney on a hike done in September 2012 via the Mountaineer’s Route. Unfortunately, given the oncoming clouds, we only had a minute or two to savor the accomplishment before we had begin the descent, but what a fun adventure!&lt;/p&gt;
+&lt;p&gt;So, a little backstory here: In August, I had been dating a girl that I was beginning to like, and then suddenly she stopped calling me and only after probably too many texts on my part, she finally had the courage to send me the ol’ fashioned breakup text. Woe is me, right? I had to do something, so I looked online for a guided climb of Mt. Whitney (the tallest peak in the lower 48, oh yeah!). There didn’t seem to be one going around Labor Day when I was going to have a chance to take a trip, so I shot some guiding companies some emails.&lt;/p&gt;
+&lt;p&gt;I contacted SWS Mountain Guides to see if I could get on a waitlist or if they had a guided hike going on around Labor Day (check them out &lt;a href=&quot;http://www.swsmtns.com/&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;, they also do many other guided climbs and I think I’m going to do Shasta 2013 Summer - they were great, so I do recommend them). One of the owners responded and said that they were putting a group together for around that time. Next thing I know, he calls me, I give my credit card, and I’m signed up. “Shit!,” I thought, “now I’m going to Mt. Whitney, and I’ve never climbed a mountain, and really haven’t done too much backpacking. I’m just a guy from the suburbs in Columbus, Ohio. How is this going to go?” Fortunately, I had been doing some training for an upcoming half-marathon, so I wasn’t completely out of shape. But, still only 5 weeks to get ready. I stepped up my running and started backpacking with 30 lbs at the various parks around Columbus.&lt;/p&gt;
+&lt;p&gt;I started to get a sharp pain in the ball of my foot from probably over-training. I suspect either Sesamoiditis or Metatarsalgia, but the podiatrist didn’t give me a diagnosis. Had an X-ray to eliminate whether or not it was a stress fracture and would it derail my planned trip (it wasn’t). Which would have been a real bummer, as I was now looking forward to it quite a bit. The doctor made up a custom little orthotic and I ended up just taking it a little easier and the pain began to subside.  So, I was good for the trip.&lt;/p&gt;
+&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;h1&gt;Lone Pine and the Portal&lt;/h1&gt;
+
+&lt;p&gt;Flew out to LAX, rented a car, and drove out to Lone Pine. I stayed in the &lt;a href=&quot;http://www.whitneyportalstore.com/&quot; target=&quot;_blank&quot;&gt;Whitney Portal Hostel&lt;/a&gt; for the night (if you do go out there, it’s a nice, cheap place to stay on your way up or out). I think I was the last one in for the night. Everyone in the room kept to themselves and I struck up a short conversation with what seemed to be a drifter type character. He seemed nice, but told stories that had more of a tall tale feel. Wasn’t sure about him, so I spooned with my bag.&lt;/p&gt;
+&lt;p&gt;Lone Pine is a tourist town, the main strip adorned with gift shops, restaurants, and bars. I’m not sure many people actually live in the town. I woke up early the next morning and walked across the street to the &lt;a href=&quot;http://www.yelp.com/biz/mt-whitney-restaurant-lone-pine&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Mt. Whitney Restaurant&lt;/a&gt; for breakfast.  It was  good, standard breakfast fare.&lt;/p&gt;
+&lt;p&gt;I decided to do some driving around and see the area. So, I drove out to the Alabama Hills, which are right there. A lot of westerns were filmed in the area. The Alabama Hills definitely have a distinct look. They are these beautiful, reddish-brown, sandy rocks jutting out of the desert, grouped and piled up together.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447420/DSC00080_utm2bv.jpg&quot; alt=&quot;Alabama Hills&quot;&gt;&lt;/p&gt;
+&lt;p&gt;The rest of the day, I spent mostly driving around and taking photographs of the scenery. I drove up to the Whitney Portal, checked it out.  Drove down, back to town.  Drove out to the main ranger station, picked up a map of the hiking routes and some post cards.  Ate lunch in town at the local coffeeshop.&lt;/p&gt;
+&lt;p&gt;I drove over to the Cottonwood Lakes area, which was actually a scarier drive and I think it may have been somewhere around 10,000 feet.  That drive seemed to take a while, both up and down.  Part of my reasoning for heading up there, along with checking out the area and having nothing else to really do, was to hopefully give my body some chance to acclimate to the higher elevation, given that I have lived my entire life at about 900 feet.&lt;/p&gt;
+&lt;p&gt;In the late afternoon, I finally headed up to the Whitney Portal. I had planned on camping out at the portal in order to give myself a chance to acclimate. Individual campgrounds are right there, just off the parking lot and I think they’re about $5 or $10 for the night.  There was really no one else around, so I had my pick of camping spots. So, I set up my tent and everything and took it easy for a little bit. Now, one thing I didn’t realize that I should have done (and I’m claiming ignorance here) is that your tent should be tied down to rocks.  This is due to, what I believe, the fact that the ground is mostly rocky, not hardened dirt, and it can also be quite windy at the higher altitudes.  There was a pile of rocks near the site and I looked at them somewhat bewildered, thinking that perhaps you put them on or in your tent to hold it down.  I put a few rocks in the tent and on the corners.  But, I think what you want to do is you want to tie some guy lines from your tent to the rocks to hold them down.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1422845212/DSC00087_gk7uid.jpg&quot; alt=&quot;Whitney Portal Sign&quot;&gt;&lt;/p&gt;
+&lt;p&gt;So, anyways, I headed off to dinner at the &lt;a href=&quot;http://www.yelp.com/biz/whitney-portal-store-lone-pine#query:portal%20restaurant&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Portal Store&lt;/a&gt;. The Portal Store is right at the start of the Whitney Trail.  It’s a little shop for last minute supplies and it’s got a kitchen that serves gigantic burgers for lunch.  Although I didn’t have breakfast, I believe they also make these huge, plate-sized pancakes.   It’s a great stop after a long day of hiking or in my case of driving the twisting roads of the Sierras.  So, I had a giant burger and fries.  I tried to sit down, but was chased away by all the bees that were after my ketchup and I ended up inhaling my food in fear of an impending bee attack and got out of there.&lt;/p&gt;
+&lt;p&gt;I took it easy the rest of the evening and the weather was beautiful.  I sat and read a book by a babbling brook near the campsite.  It was great.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447405/DSC00117_jplfky.jpg&quot; alt=&quot;Camping at the Whitney Portal&quot;&gt;&lt;/p&gt;
+&lt;!-- more --&gt;
+&lt;h1&gt;Day One - To Basecamp&lt;/h1&gt;
+
+&lt;p&gt;Woke up early, packed up my tent, threw everything into my rented Kia Soul and headed back down to Lone Pine to meet the group and the guides. We met outside of the local outdoor gear shop right in the center of town called &lt;a href=&quot;http://www.sierraelevation.com/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Elevation Sierra Essentials&lt;/a&gt;. It’s owned by a fellow named John, who ended up being one of our guides, and is a truly kind, knowledgeable person.  If you end up needing any gear before a Whitney hike, this is the place to stop into.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/a_auto_left/v1422845450/DSC00220_snnsdg.jpg&quot; alt=&quot;Mountaineer&amp;#39;s Route Sign&quot;&gt;&lt;/p&gt;
+&lt;p&gt;We did a gear check with the guides, Tim and John, making sure we had everything we needed and if not we could just buy it next door.  The group consisted of six hikers plus two guides. There was a father and son (Gabe and Michael), two old friends (John and Joann), a single hiker (Esther), and myself. So, we repacked our stuff, found parking for our cars, and we drove up to the portal to begin hiking.&lt;/p&gt;
+&lt;p&gt;We started on the Whitney trail for only a little bit until the the Mountaineer’s Route breaks off. What makes it a route and not a trail is that it isn’t explicitly marked.  You can take anyway to get there, it’s more of a guidance.&lt;/p&gt;
+&lt;p&gt;So, once you break from the Whitney Trail, it almost immediately becomes more steep and some bouldering is involved.  At this point, one of the hikers, John (who I believe may have had a bad knee) decided to head back.  He was out for the trip.&lt;/p&gt;
+&lt;p&gt;The hiking early on isn’t too bad, over some creeks and rocks, but as to be expected from a mountain climb, it is consistently steep.  So, one technique that you want to utilize as much as possible is the &lt;a href=&quot;http://www.backpacker.com/september_2005_skills_rest_step/skills/12283&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;mountaineer’s rest step&lt;/a&gt;.  It’s essential for mountaineering.  Basically: 1) you take one step forward, allowing your back leg knee to lock, keeping the weight on the back knee; 2) you then shift your weight to the front leg and step up with the back leg, keeping weight off the stepping leg, then locking the knee of the rear leg (back to step one).  This allows you to take tiny rests as you are climbing.  It also slows you down a little bit and as things get steeper, the amount of steps taken may slow down.&lt;/p&gt;
+&lt;p&gt;There was some minor bouldering and climbing over rocks, but nothing of note until you come upon the Ebersbacher Ledges.&lt;/p&gt;
+&lt;h3&gt;Ebersbacher Ledges&lt;/h3&gt;
+
+&lt;p&gt;The  Ebersbacher Ledges consist of a quick traverse that is exposed and then climbing of a series of a few accessible ledges until you are clear.  The difficulty with the ledges is primarily that of exposure.  It’s not serious climbing, it’s simply that a serious loss of balance would end badly.  I also think part of it is a bit of a self-fulfilling prophecy.  Everyone says they’re tricky and frightening, so they become that way.  So, they’re not difficult to climb in a technical, they’re just difficult in the face of exposure. The key, obviously, is steadiness.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447498/DSC00142_zbde5p.jpg&quot; alt=&quot;Ebersbacher Ledges&quot;&gt;&lt;/p&gt;
+&lt;p&gt;One thing to note is that, you do need to know where to go up, as from some stories John was telling me, there have been hikers who have continued across the face and realized that they had passed the ledges to get up and then had gotten either stuck in a bad place or had to backtrack.&lt;/p&gt;
+&lt;p&gt;So, getting the Ebersbacher Ledges, we then proceeded across the traverse one-by-one and then up the ledges.  One of the hikers got a little spooked, and I felt the same way, so one of the guides coaxed each of us across the traverse to the ledges.  It was then up the ledges, hike across a tree, and then up a few more and we were done.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447500/DSC00143_qpmfhm.jpg&quot; alt=&quot;Ebersbacher Ledges&quot;&gt;&lt;/p&gt;
+&lt;p&gt;We then continued to hike up to Lower Boy Scout Lake.  Unfortunately during the hike it began raining, so on came the rain coats and pants, and with it still being quite warm, it was a bit uncomfortable.  We got to Lower Boy Scout Lake for lunch and fortunately found a bit of cover to sit and relax as it had begun raining much harder at this point.  Lower Boy Scout Lake lies at about 10,300 feet and is still mostly within the tree line.  It’s a beautiful spot to sit and relax after a morning’s vigorous hike.&lt;/p&gt;
+&lt;p&gt;I downed a couple of Clif bars (which by the end of the hike I was thoroughly tired of eating. It’s sort of like Champagne, if you have too much you’re going to swear it off for good.  That’s me and the peanut butter flavored Clif bars, I just had too many that week) and off we went.  Up the mountain, over some water run offs, it can get a little slick, so footing continues to be key and a good pair of hiking poles are nice to have.  We climbed another 1,000 feet or so, to our base camp at Upper Boy Scout Lake (~11,300 feet).&lt;/p&gt;
+&lt;p&gt;A tent had already been setup prior to our arrival, most likely from a previous guided climb, and staked out a great spot on the rocks.  So, we set up two more tents, dried our stuff off a bit and made a few phone calls (yes, there is cell phone reception up there, wow!?!).  Upper Boy Scout Lake is a good spot to camp on this hike, although if you do want to go further, you can make it to Iceberg Lake in time if your pace is good.&lt;/p&gt;
+&lt;p&gt;John then took us out and gave us a tutorial on rope climbing and belaying basics with a group of climbers.  We came back, ate some noodles for dinner, and went to bed as the plan was to get up early (2 or 3 am) for the hike to the summit. The sky was clear that night, so I took some time to lay out on a rock and stare up at the stars.  Wonderful.&lt;/p&gt;
+&lt;p&gt;To setup a tent where there is no good clay to hold stakes, the best way is to guy line the tent to heavy rocks.  It’s also quite windy on Mt. Whitney, so it’s just a good idea.  Here’s a quick tutorial on how to tie a taut line:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://youtu.be/ihL5cnj5nKU&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://youtu.be/ihL5cnj5nKU&lt;/a&gt;&lt;/p&gt;
+&lt;!-- more --&gt;
+&lt;h1&gt;Day Two - Summit&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447524/DSC00160_p1kbkf.jpg&quot; alt=&quot;Sunrise in the Sierras&quot;&gt;&lt;/p&gt;
+&lt;p&gt;We awoke at 3:30am, a little later than we wanted, tossed on our headlamps, threw on our packs, and headed up the trail to Iceberg Lake (~12,600 feet).  The night prior, we unloaded most of the unneccessary stuff from our packs for the summit hike.  I had asked Tim why it was that we didn’t need the smaller “Summit Packs” and the fact that they wanted us to carry our large packs and the reason he gave, was that the full packs are better at protecting your entire back should you fall back or hit a rock.&lt;/p&gt;
+&lt;p&gt;It was relatively cold in the early morning, so we warmed up quickly.  Because of the late start, Tim, the main guide, pushed the pace a bit.  It wasn’t too bad, but some  of the folks in the group began slowing up.  The hike wasn’t too bad, with a bit of rock scrambling, but nothing overly strenuous.&lt;/p&gt;
+&lt;p&gt;Not until we got to Iceberg Lake, did the climb begin to take on any real difficulty.  This was where the true climb began.  We arrived around 8am, rested and ate, before beginning the final ascent.  Joann at this point began not feeling well and decided not to join us in the climb.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1422846390/DSC00174_dv7b86.jpg&quot; alt=&quot;Iceberg Lake&quot;&gt;&lt;/p&gt;
+&lt;p&gt;For the first part of the climb, it was heavy bouldering.  My hands and legs got a bit chewed up from the coarse rock, but nothing terrible.  Tim, Gabe, and I began to move a bit quicker than Michael and Esther at this point (John was guiding them), so Tim began pushing us at a quicker pace to attempt a summit climb as clouds were seen moving in.   After a couple of hours of scrambling, we got to a rest point called “Piss Rock,” for obvious reasons.  Took a short breather and then continued heading up.  There was very little snow on the mountain, it was mostly gravel, so footing became an issue and moving quickly was apparent.  It was definitely exhausting, maintaining such a solid pace. After what I believe was an hour or two more, we reached the “Notch.”&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://res.cloudinary.com/dgfchlycf/image/upload/v1422846894/DSC00185_dkjv3r.jpg&quot; alt=&quot;View upwards from the Notch&quot;&gt;&lt;/p&gt;
+&lt;p&gt;It was here that we made the true final climb to the summit of Mt. Whitney of about 500 feet.  We again took a brief breather and had something to eat. First, you have to scramble up a brief precipice before getting to a spot where you mostly just climb up rocks.  Tim first scrambled up and got some rope into place.  Gabe and I then hooked up and scrambled up.  Not terrible, we just had to move quickly.  At this point, Tim would go on ahead, get the rope fixed for “on belay” and then we would follow.  There were a few blind rocks where we had to pull ourselves up, but nothing like rock climbing a face.  Tim was trying to getting us up there quickly as a cloud was moving in and he wanted to get us up and off the summit in order to avoid any chance of lightning strikes.&lt;/p&gt;
+&lt;p&gt;Well, we made it.  We got a few minutes at the top.  I remember the feeling of elation of reaching the summit.  What a good feeling to achieve the summit. I wanted to run over to the house and sign the book, but Tim was obviously nervous at this point and wanted to get us down.  I don’t blame him as he is charged with responsibility for us, “the clients.”  So, down we went.  Unfortunately, Esther and Michael didn’t get the chance to go for the summit as Tim called them off given the oncoming clouds.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1422846880/DSC00191_rgah2s.jpg&quot; alt=&quot;View from the Summit of Mt. Whitney&quot;&gt;&lt;/p&gt;
+&lt;p&gt;I actually found the climb down from this point to be more difficult than the climb up as getting my footing was at times blind and uncertain.  And as they say “49% is getting to the top.”  At the scramble part, as I was trying to slowly ease myself down, I fell.  Fortunately, I was on rope, so Tim caught me.  It could have been quite ugly.  Thank you, Tim.&lt;/p&gt;
+&lt;p&gt;From the Notch down, it wasn’t too bad.  Footing really was the issue as we began the descent as the rock is quite loose in this section.  Another few more hours and we were back at Iceberg Lake, with the most difficult portion of the climb past us. We took a nice break.  At this point it was the afternoon, so we started out to Upper Boy Scout Lake to get back for dinner and rest.  At this point, I began dragging a bit and not hiking as quickly.  Nearer to Upper Boy Scout Lake there is a large amount of quartz rock.&lt;/p&gt;
+&lt;!-- more --&gt;
+&lt;h1&gt;Day Three - Back to Lone Pine&lt;/h1&gt;
+
+&lt;p&gt;We woke up early to a beautiful sunrise over the Sierras, ate a nice hot breakfast of oatmeal, and headed down.  We didn’t have to pack up the tents as a group was heading up that day to utilize them, which was a nice bonus.  The hike down wasn’t too bad, I was just a bit worn out from the previous day, so my technique at times got bad, allowing my front knee to lock up.  Not a good idea and an easy way to injure oneself especially with a 30-40 pound pack.  The day was great and as we descended, it got progressively warmer.&lt;/p&gt;
+&lt;p&gt;Down at the Ebersbacher Ledges, I had a bit of moment of freak-out and began to get nervous, got myself a little stuck and uncomfortable on them.  Made it through them, though, with some coaxing from John (thank god for John).&lt;/p&gt;
+&lt;p&gt;Unfortunately, I think my boots may have been too small and didn’t leave enough toe room, so I got a serious case of toe bang and lost a few toe nails to it.  I really should have been wearing about a half size larger to give my toes so more room.  Lesson learned.&lt;/p&gt;
+&lt;p&gt;Well, we got down to Portal, took a few photos and headed back to Lone Pine.  We all ate a celebratory lunch at the Mt. Whitney Restaurant, enjoying a nice big burger and beer.&lt;/p&gt;
+&lt;p&gt;I was so worn out that I decided to stay the night in Lone Pine before heading to the coast for some surfing and relaxing on the beach.&lt;/p&gt;
+&lt;!-- more --&gt;
+&lt;h1&gt;Further Reading on Mt. Whitney&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1422845749/DSC00224_cgvirj.jpg&quot; alt=&quot;Group that went on the hike&quot;&gt;&lt;/p&gt;
+&lt;p&gt;Here’s a link also to another great blog regarding hiking the Mountaineer’s Route of Mt. Whitney that I found helpful before I went: &lt;a href=&quot;http://www.sierradescents.com/climbing/whitney/mountaineers-route.html&quot; target=&quot;_blank&quot;&gt;http://www.sierradescents.com/climbing/whitney/mountaineers-route.html&lt;/a&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1422844474/DSC00190_o01n7g.jpg&quot; alt=&quot;Summit of Mt. Whitney&quot;&gt;&lt;/p&gt;
+&lt;p&gt;Well, here I am on the summit of Mt. Whitney on a hike done in September 2012 via the Mountaineer’s Route. Unfortunately, given the oncoming clouds, we only had a minute or two to savor the accomplishment before we had begin the descent, but what a fun adventure!&lt;/p&gt;
+&lt;p&gt;So, a little backstory here: In August, I had been dating a girl that I was beginning to like, and then suddenly she stopped calling me and only after probably too many texts on my part, she finally had the courage to send me the ol’ fashioned breakup text. Woe is me, right? I had to do something, so I looked online for a guided climb of Mt. Whitney (the tallest peak in the lower 48, oh yeah!). There didn’t seem to be one going around Labor Day when I was going to have a chance to take a trip, so I shot some guiding companies some emails.&lt;/p&gt;
+&lt;p&gt;I contacted SWS Mountain Guides to see if I could get on a waitlist or if they had a guided hike going on around Labor Day (check them out &lt;a href=&quot;http://www.swsmtns.com/&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;, they also do many other guided climbs and I think I’m going to do Shasta 2013 Summer - they were great, so I do recommend them). One of the owners responded and said that they were putting a group together for around that time. Next thing I know, he calls me, I give my credit card, and I’m signed up. “Shit!,” I thought, “now I’m going to Mt. Whitney, and I’ve never climbed a mountain, and really haven’t done too much backpacking. I’m just a guy from the suburbs in Columbus, Ohio. How is this going to go?” Fortunately, I had been doing some training for an upcoming half-marathon, so I wasn’t completely out of shape. But, still only 5 weeks to get ready. I stepped up my running and started backpacking with 30 lbs at the various parks around Columbus.&lt;/p&gt;
+&lt;p&gt;I started to get a sharp pain in the ball of my foot from probably over-training. I suspect either Sesamoiditis or Metatarsalgia, but the podiatrist didn’t give me a diagnosis. Had an X-ray to eliminate whether or not it was a stress fracture and would it derail my planned trip (it wasn’t). Which would have been a real bummer, as I was now looking forward to it quite a bit. The doctor made up a custom little orthotic and I ended up just taking it a little easier and the pain began to subside.  So, I was good for the trip.&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="Mt. Whitney" scheme="http://ralucas.github.io/tags/Mt-Whitney/"/>
+    
+      <category term="Mountaineer's Route" scheme="http://ralucas.github.io/tags/Mountaineer-s-Route/"/>
+    
+      <category term="Mountaineering" scheme="http://ralucas.github.io/tags/Mountaineering/"/>
+    
+      <category term="Climbing" scheme="http://ralucas.github.io/tags/Climbing/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hello</title>
+    <link href="http://ralucas.github.io/2012/09/23/Hello/"/>
+    <id>http://ralucas.github.io/2012/09/23/Hello/</id>
+    <published>2012-09-24T00:36:49.000Z</published>
+    <updated>2016-04-27T10:44:08.000Z</updated>
+    
+    <content type="html">&lt;p&gt;Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my profile &lt;a href=&quot;https://github.com/ralucas&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@ralucas&lt;/a&gt;, via twitter &lt;a href=&quot;https://twitter.com/r_a_lucas&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@r_a_lucas&lt;/a&gt;, or email richard@richardalucas.com.&lt;/p&gt;
+&lt;p&gt;Cheers!&lt;/p&gt;
+&lt;p&gt;Richard&lt;/p&gt;
+&lt;h2 id=&quot;Current-Projects&quot;&gt;&lt;a href=&quot;#Current-Projects&quot; class=&quot;headerlink&quot; title=&quot;Current Projects:&quot;&gt;&lt;/a&gt;Current Projects:&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;/node-zillow&quot;&gt;Node-Zillow&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my 
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>
