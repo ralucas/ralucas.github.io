@@ -9,6 +9,11 @@
     padding-right: 5%;
   }
 }
+
+.sidebar-container .widget-title {
+  padding: .5em 0 0 0;
+}
+
 .sidebar-container {
   color: #bfbfbf;
   font-size: 14px;
@@ -881,8 +886,8 @@ body {
   margin-top: 3px;
 }
 /* Hux customize Style for Duoshuo */
-.comment {
-  margin-top: 20px;
+#comments {
+  margin-top: 2em;
 }
 .comment #ds-thread #ds-reset a.ds-like-thread-button {
   border: 1px solid #ddd;
