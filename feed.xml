@@ -215,6 +215,64 @@
   </entry>
   
   <entry>
+    <title>Understanding PortLand</title>
+    <link href="http://ralucas.github.io/2016/04/20/Understanding-PortLand/"/>
+    <id>http://ralucas.github.io/2016/04/20/Understanding-PortLand/</id>
+    <published>2016-04-20T06:00:00.000Z</published>
+    <updated>2016-04-29T05:54:35.000Z</updated>
+    
+    <content type="html">&lt;h3 id=&quot;What-is-PortLand&quot;&gt;&lt;a href=&quot;#What-is-PortLand&quot; class=&quot;headerlink&quot; title=&quot;What is PortLand&quot;&gt;&lt;/a&gt;What is PortLand&lt;/h3&gt;&lt;p&gt;Today, most web applications are hosted in the “cloud”, which is in turn hosted in huge datacenters located in various places all over the world. Modern datacenters today suffer from a few limitations including: lack of scalability, difficult management, inflexible communication, and limited support for virtual machine migration.[1] PortLand is a proposal that attempted to solve some of these limitations. And what PortLand proposes is a solution to mitigate these issues by delivering scalable layer 2 routing, forwarding, and addressing for large data center networks.  Portland utilizes the three tier fat-tree topology of edge hosts connected to aggreggation hosts which are connected to core hosts (Figure 1).&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;resources/0463E74CD6E2574BA0BAB3B1BBA7F63E.png&quot; alt=&quot;fat-tree-topology.png&quot;&gt;&lt;/p&gt;
+&lt;h3 id=&quot;Why-Layer-2&quot;&gt;&lt;a href=&quot;#Why-Layer-2&quot; class=&quot;headerlink&quot; title=&quot;Why Layer 2&quot;&gt;&lt;/a&gt;Why Layer 2&lt;/h3&gt;&lt;p&gt;In large data centers, certain requirements come into being:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Easy VM migration&lt;/li&gt;
+&lt;li&gt;Need for less active administration and configuration&lt;/li&gt;
+&lt;li&gt;Efficient end-host to end-host communication&lt;/li&gt;
+&lt;li&gt;No forwarding loops&lt;/li&gt;
+&lt;li&gt;Rapid and efficient failure detection&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Layer 3, IP, doesn’t enable easy VM migration as migration requires that VM’s change their IP addresses.  Additionally, configuration of a Layer 3 data center is onerous given that it requires each switch to be configured and DHCP servers to be synchronized.  Layer 2, while not the silver bullet, is still more able to satisfy these requirements under the Portland scenario.&lt;/p&gt;
+&lt;p&gt;Portland is able to solve these issues through the use of Pseudo MAC addresses, controlled by a centralized mechanism (Fabric Manager), enabling efficient, loop-free forwarding with little necessary state management. &lt;/p&gt;
+&lt;h3 id=&quot;Fabric-Manager&quot;&gt;&lt;a href=&quot;#Fabric-Manager&quot; class=&quot;headerlink&quot; title=&quot;Fabric Manager&quot;&gt;&lt;/a&gt;Fabric Manager&lt;/h3&gt;&lt;p&gt;The &lt;em&gt;fabric manager&lt;/em&gt; is a centralized (user) process running on a dedicated machine that maintains a soft state about the network configuration.  These responsibilities include information about the topology, assisting with ARP resolution, fault tolerance, and multicast. The use of &lt;em&gt;soft state&lt;/em&gt; is important here as it eliminates the need for active administration and replication is simpler as state does not need to be replicated as well.&lt;/p&gt;
+&lt;h4 id=&quot;What-the-Fabric-Manager-FM-Does&quot;&gt;&lt;a href=&quot;#What-the-Fabric-Manager-FM-Does&quot; class=&quot;headerlink&quot; title=&quot;What the Fabric Manager (FM) Does&quot;&gt;&lt;/a&gt;What the Fabric Manager (FM) Does&lt;/h4&gt;&lt;p&gt;The fabric manager reduces broadcast overhead in the common ARP request cases. So, when an edge switch intercepts a ARP request for IP to MAC mapping, it forwards the request onto the fabric manager, and the FM checks the PMAC table (see below), if the entry is there, it gives the PMAC back to the edge switch which creates the ARP reply and sends it to the original host.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;VM Migration&lt;/strong&gt;&lt;br&gt;Additionally, when doing VM migration, the VM will send out an ARP with it’s new IP to MAC mapping, which gets forwarded to the FM.  The FM, in an effort to invalidate any cache that hosts may have regarding the newly migrated VM, sends out an invalidation message to the migrated VM’s previous switch.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Location&lt;/strong&gt;&lt;br&gt;The fabric manager is located in the logical center of the data center. It can also be located&lt;/p&gt;
+&lt;h3 id=&quot;Pseudo-MAC-Addresses&quot;&gt;&lt;a href=&quot;#Pseudo-MAC-Addresses&quot; class=&quot;headerlink&quot; title=&quot;Pseudo MAC Addresses&quot;&gt;&lt;/a&gt;Pseudo MAC Addresses&lt;/h3&gt;&lt;p&gt;In order to efficiently forward and route as well as easily migrate VMs, Portland utilizes the concept of heirarchical Pseudo MAC Addresses (PMACs). Each end host in the data center gets a PMAC and in turn the PMAC encodes the location of the host in the DC topology.&lt;/p&gt;
+&lt;h4 id=&quot;Components-of-PMAC&quot;&gt;&lt;a href=&quot;#Components-of-PMAC&quot; class=&quot;headerlink&quot; title=&quot;Components of PMAC&quot;&gt;&lt;/a&gt;Components of PMAC&lt;/h4&gt;&lt;p&gt;The 48-bit PMAC is composed of 4 parts in the form of &lt;code&gt;[pod].[position].[port].[vmid]&lt;/code&gt;, so:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pod (16bits): The pod number of the edge switch&lt;/li&gt;
+&lt;li&gt;Position (8bits): Hosts position in the pod&lt;/li&gt;
+&lt;li&gt;Port (8bits): Switch-local view of the port number the host is connected to&lt;/li&gt;
+&lt;li&gt;VMID (16bits): Used to multiplex multiple VMs on the physical box.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This constructed PMAC (&lt;code&gt;[pod].[position].[port].[vmid]&lt;/code&gt;) is then entered into the switch’s local PMAC table that is mapped to the hosts Actual MAC address (AMAC) and IP address.  This mapping then is propogated to the Fabric Manager and it uses it to respond to ARP requests.  Additionally, the switch creates a flow table entry to rewrite PMAC destination address to the AMAC for traffic headed to that host.&lt;/p&gt;
+&lt;h4 id=&quot;Why-PMAC-is-useful&quot;&gt;&lt;a href=&quot;#Why-PMAC-is-useful&quot; class=&quot;headerlink&quot; title=&quot;Why PMAC is useful&quot;&gt;&lt;/a&gt;Why PMAC is useful&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;PMAC addresses enable efficient, provably loop-free forwarding with small switch state.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Given that traditional layer 2 based centers have scalability and efficiency issues due to the need to support broadcast (usually via ARP).  It also requires that switches maintain large MAC forwarding tables that can have 100,000 to millions of entries, requiring memory and software that just isn’t practical in today’s switch hardware landscape.&lt;/p&gt;
+&lt;h3 id=&quot;Location-Discovery-Protocol&quot;&gt;&lt;a href=&quot;#Location-Discovery-Protocol&quot; class=&quot;headerlink&quot; title=&quot;Location Discovery Protocol&quot;&gt;&lt;/a&gt;Location Discovery Protocol&lt;/h3&gt;&lt;p&gt;The &lt;em&gt;Location Discovery Protocol&lt;/em&gt; (LDP) is used in the assignment of the PMAC. LDP in turn, utilizes a messaging system called Location Discovery Message (LDM), that gets periodically sent by switches in the system out on all of their ports. This protocol enables loop free propogation of packets by ensuring that packets travel down the topology and not back up.&lt;/p&gt;
+&lt;h3 id=&quot;Conclusion&quot;&gt;&lt;a href=&quot;#Conclusion&quot; class=&quot;headerlink&quot; title=&quot;Conclusion&quot;&gt;&lt;/a&gt;Conclusion&lt;/h3&gt;&lt;p&gt;Portland is a data center network fabric that utilizes PMACs, a Fabric Manager, and a Location Discovery Protocol as the core components for improving data handling in large scale data centers.  This design improves on forwarding table sizes, which when layer 2 mapped, can contain 100,000 or more entries&lt;/p&gt;
+&lt;p&gt;[1] Mysore, Pamboris, Farrington, Huang, Miri, Radhakrishnan, Subramanya, and Vahdat. 2009. &lt;a href=&quot;http://www.sigcomm.org/ccr/papers/2009/October/1594977.1592575&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;em&gt;PortLand: A Scalable Fault-Tolerant Layer 2 Data Center Network Fabric&lt;/em&gt;&lt;/a&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;What-is-PortLand&quot;&gt;&lt;a href=&quot;#What-is-PortLand&quot; class=&quot;headerlink&quot; title=&quot;What is PortLand&quot;&gt;&lt;/a&gt;What is PortLand&lt;/h3&gt;&lt;p&gt;Today, most we
+    
+    </summary>
+    
+    
+      <category term="Data centers" scheme="http://ralucas.github.io/tags/Data-centers/"/>
+    
+      <category term="Networking" scheme="http://ralucas.github.io/tags/Networking/"/>
+    
+      <category term="PortLand" scheme="http://ralucas.github.io/tags/PortLand/"/>
+    
+      <category term="Ethernet" scheme="http://ralucas.github.io/tags/Ethernet/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Understanding Controlling Queue Delay and CoDel</title>
     <link href="http://ralucas.github.io/2016/04/19/Understanding-Controlling-Queue-Delay/"/>
     <id>http://ralucas.github.io/2016/04/19/Understanding-Controlling-Queue-Delay/</id>
