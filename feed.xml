@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2016-08-12T05:15:22.000Z</updated>
+  <updated>2016-08-12T05:27:11.000Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://ralucas.github.io/2016/08/11/Writing-a-small-socket-server-in-C/"/>
     <id>http://ralucas.github.io/2016/08/11/Writing-a-small-socket-server-in-C/</id>
     <published>2016-08-12T05:15:22.000Z</published>
-    <updated>2016-08-12T05:15:22.000Z</updated>
+    <updated>2016-08-12T05:27:11.000Z</updated>
     
     <content type="html">&lt;p&gt;Building a socket server in C is a great introduction to the language as well as IPC mechanisms such as sockets and it can show you how simple it is to set up a server.  For this installment, we’re going to do a single-threaded version.&lt;/p&gt;
 &lt;p&gt;So, let’s get started…&lt;/p&gt;
@@ -40,6 +40,8 @@
 &lt;p&gt;Now let’s run the server by running an infinite loop&lt;/p&gt;
 &lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;31&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;for (;;) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  int client;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  struct sockaddr_in client_address;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  socklen_t client_len;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  client_len = sizeof(client_address);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Accept incoming connections from the client&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if ( (client = accept(server_socket_fd, (struct sockaddr *) &amp;amp;client_address, &amp;amp;client_len)) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    perror(&amp;quot;Error accepting on the server socket&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Receive the message&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  int receiver;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if ( (receiver = recv(client, buffer, BUFSIZE - 1, 0)) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    perror(&amp;quot;Error receiving message from the client);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Respond&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  ssize_t sender;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  char response[BUFSIZE];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  size_t len;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  strcpy(response, &amp;quot;This is a response string!&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  len = strlen(response);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if ( (sender = send(client, response, len, 0)) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    perror(&amp;quot;Error sending the response&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  fprintf(stdout, &amp;quot;Successfully sent (%i) message&amp;quot;, sender);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 &lt;p&gt;Go ahead, build it, and fire it up and send a curl request.  In a future post, I’ll build an HTTP server.&lt;/p&gt;
+&lt;p&gt;The source code for this can be found here: &lt;a href=&quot;https://github.com/ralucas/basic_c_socket_server&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://github.com/ralucas/basic_c_socket_server&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I also suggest taking a look at &lt;a href=&quot;http://beej.us/guide/bgnet/output/html/singlepage/bgnet.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Beej’s Guide to Networking&lt;/a&gt;&lt;/p&gt;
 </content>
     
     <summary type="html">
@@ -772,11 +774,11 @@
     
       <category term="Marathon" scheme="http://ralucas.github.io/tags/Marathon/"/>
     
+      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
+    
       <category term="Cleveland" scheme="http://ralucas.github.io/tags/Cleveland/"/>
     
       <category term="Race Report" scheme="http://ralucas.github.io/tags/Race-Report/"/>
-    
-      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
     
   </entry>
   
@@ -813,9 +815,9 @@
     
       <category term="Marathon" scheme="http://ralucas.github.io/tags/Marathon/"/>
     
-      <category term="Cleveland" scheme="http://ralucas.github.io/tags/Cleveland/"/>
-    
       <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
+    
+      <category term="Cleveland" scheme="http://ralucas.github.io/tags/Cleveland/"/>
     
   </entry>
   
