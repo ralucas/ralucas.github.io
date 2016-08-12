@@ -13,11 +13,11 @@
 
     <title>
         
-          Understanding PortLand - Richard Lucas&#39; Blog
+          Writing a small socket server in C - Richard Lucas&#39; Blog
         
     </title>
 
-    <link rel="canonical" href="http://ralucas.github.io/2016/04/28/Understanding-PortLand/">
+    <link rel="canonical" href="http://ralucas.github.io/2016/08/11/Writing-a-small-socket-server-in-C/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -141,21 +141,19 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                          <a class="tag" href="/tags/Data-centers/" title="Data centers">Data centers</a>
+                          <a class="tag" href="/tags/sockets/" title="sockets">sockets</a>
                         
-                          <a class="tag" href="/tags/Networking/" title="Networking">Networking</a>
+                          <a class="tag" href="/tags/C/" title="C">C</a>
                         
-                          <a class="tag" href="/tags/PortLand/" title="PortLand">PortLand</a>
-                        
-                          <a class="tag" href="/tags/Ethernet/" title="Ethernet">Ethernet</a>
+                          <a class="tag" href="/tags/sys-socket-h/" title="sys/socket.h">sys/socket.h</a>
                         
 
                     </div>
-                    <h1>Understanding PortLand</h1>
+                    <h1>Writing a small socket server in C</h1>
                     
                     <span class="meta">
                         Posted by Richard Lucas on
-                        Apr 28 2016
+                        Aug 11 2016
                     </span>
                 </div>
             </div>
@@ -174,38 +172,24 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-                <h3 id="What-is-PortLand"><a href="#What-is-PortLand" class="headerlink" title="What is PortLand"></a>What is PortLand</h3><p>Today, most web applications are hosted in the “cloud”, which is in turn hosted in huge datacenters located in various places all over the world. Modern datacenters today suffer from a few limitations including: lack of scalability, difficult management, inflexible communication, and limited support for virtual machine migration.[1] PortLand is a proposal that attempted to solve some of these limitations. And what PortLand proposes is a solution to mitigate these issues by delivering scalable layer 2 routing, forwarding, and addressing for large data center networks.  Portland utilizes the three tier fat-tree topology of edge hosts connected to aggreggation hosts which are connected to core hosts (Figure 1).</p>
-<p><img src="/resources/0463E74CD6E2574BA0BAB3B1BBA7F63E.png" alt="fat-tree-topology.png"></p>
-<h3 id="Why-Layer-2"><a href="#Why-Layer-2" class="headerlink" title="Why Layer 2"></a>Why Layer 2</h3><p>In large data centers, certain requirements come into being:</p>
-<ul>
-<li>Easy VM migration</li>
-<li>Need for less active administration and configuration</li>
-<li>Efficient end-host to end-host communication</li>
-<li>No forwarding loops</li>
-<li>Rapid and efficient failure detection</li>
-</ul>
-<p>Layer 3, IP, doesn’t enable easy VM migration as migration requires that VM’s change their IP addresses.  Additionally, configuration of a Layer 3 data center is onerous given that it requires each switch to be configured and DHCP servers to be synchronized.  Layer 2, while not the silver bullet, is still more able to satisfy these requirements under the Portland scenario.</p>
-<p>Portland is able to solve these issues through the use of Pseudo MAC addresses, controlled by a centralized mechanism (Fabric Manager), enabling efficient, loop-free forwarding with little necessary state management. </p>
-<h3 id="Fabric-Manager"><a href="#Fabric-Manager" class="headerlink" title="Fabric Manager"></a>Fabric Manager</h3><p>The <em>fabric manager</em> is a centralized (user) process running on a dedicated machine that maintains a soft state about the network configuration.  These responsibilities include information about the topology, assisting with ARP resolution, fault tolerance, and multicast. The use of <em>soft state</em> is important here as it eliminates the need for active administration and replication is simpler as state does not need to be replicated as well.</p>
-<h4 id="What-the-Fabric-Manager-FM-Does"><a href="#What-the-Fabric-Manager-FM-Does" class="headerlink" title="What the Fabric Manager (FM) Does"></a>What the Fabric Manager (FM) Does</h4><p>The fabric manager reduces broadcast overhead in the common ARP request cases. So, when an edge switch intercepts a ARP request for IP to MAC mapping, it forwards the request onto the fabric manager, and the FM checks the PMAC table (see below), if the entry is there, it gives the PMAC back to the edge switch which creates the ARP reply and sends it to the original host.</p>
-<p><strong>VM Migration</strong><br>Additionally, when doing VM migration, the VM will send out an ARP with it’s new IP to MAC mapping, which gets forwarded to the FM.  The FM, in an effort to invalidate any cache that hosts may have regarding the newly migrated VM, sends out an invalidation message to the migrated VM’s previous switch.</p>
-<p><strong>Location</strong><br>The fabric manager is located in the logical center of the data center. It can also be located</p>
-<h3 id="Pseudo-MAC-Addresses"><a href="#Pseudo-MAC-Addresses" class="headerlink" title="Pseudo MAC Addresses"></a>Pseudo MAC Addresses</h3><p>In order to efficiently forward and route as well as easily migrate VMs, Portland utilizes the concept of heirarchical Pseudo MAC Addresses (PMACs). Each end host in the data center gets a PMAC and in turn the PMAC encodes the location of the host in the DC topology.</p>
-<h4 id="Components-of-PMAC"><a href="#Components-of-PMAC" class="headerlink" title="Components of PMAC"></a>Components of PMAC</h4><p>The 48-bit PMAC is composed of 4 parts in the form of <code>[pod].[position].[port].[vmid]</code>, so:</p>
-<ul>
-<li>Pod (16bits): The pod number of the edge switch</li>
-<li>Position (8bits): Hosts position in the pod</li>
-<li>Port (8bits): Switch-local view of the port number the host is connected to</li>
-<li>VMID (16bits): Used to multiplex multiple VMs on the physical box.</li>
-</ul>
-<p>This constructed PMAC (<code>[pod].[position].[port].[vmid]</code>) is then entered into the switch’s local PMAC table that is mapped to the hosts Actual MAC address (AMAC) and IP address.  This mapping then is propogated to the Fabric Manager and it uses it to respond to ARP requests.  Additionally, the switch creates a flow table entry to rewrite PMAC destination address to the AMAC for traffic headed to that host.</p>
-<h4 id="Why-PMAC-is-useful"><a href="#Why-PMAC-is-useful" class="headerlink" title="Why PMAC is useful"></a>Why PMAC is useful</h4><blockquote>
-<p>PMAC addresses enable efficient, provably loop-free forwarding with small switch state.</p>
-</blockquote>
-<p>Given that traditional layer 2 based centers have scalability and efficiency issues due to the need to support broadcast (usually via ARP).  It also requires that switches maintain large MAC forwarding tables that can have 100,000 to millions of entries, requiring memory and software that just isn’t practical in today’s switch hardware landscape.</p>
-<h3 id="Location-Discovery-Protocol"><a href="#Location-Discovery-Protocol" class="headerlink" title="Location Discovery Protocol"></a>Location Discovery Protocol</h3><p>The <em>Location Discovery Protocol</em> (LDP) is used in the assignment of the PMAC. LDP in turn, utilizes a messaging system called Location Discovery Message (LDM), that gets periodically sent by switches in the system out on all of their ports. This protocol enables loop free propogation of packets by ensuring that packets travel down the topology and not back up.</p>
-<h3 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h3><p>Portland is a data center network fabric that utilizes PMACs, a Fabric Manager, and a Location Discovery Protocol as the core components for improving data handling in large scale data centers.  This design improves on forwarding table sizes, which when layer 2 mapped, can contain 100,000 or more entries</p>
-<p>[1] Mysore, Pamboris, Farrington, Huang, Miri, Radhakrishnan, Subramanya, and Vahdat. 2009. <a href="http://www.sigcomm.org/ccr/papers/2009/October/1594977.1592575" target="_blank" rel="external"><em>PortLand: A Scalable Fault-Tolerant Layer 2 Data Center Network Fabric</em></a></p>
+                <p>Building a socket server in C is a great introduction to the language as well as IPC mechanisms such as sockets and it can show you how simple it is to set up a server.  For this installment, we’re going to do a single-threaded version.</p>
+<p>So, let’s get started…</p>
+<h3 id="The-Server"><a href="#The-Server" class="headerlink" title="The Server"></a>The Server</h3><p>First I want to define some constants that we’ll use throughout. For some of these you may want to pass these in dynamically, but for this case I’m just hardcoding them here as constants:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#define SOCKET_ERROR  -1</span><br><span class="line"></span><br><span class="line">#define MAX_PENDING_CONNECTIONS   10</span><br><span class="line">#define LOCALHOST   &quot;127.0.0.1&quot;</span><br><span class="line">#define PORT        8080</span><br><span class="line">#define BUFSIZE     1024</span><br></pre></td></tr></table></figure>
+<p>We’ll put the server in a void function that we’ll call serve: <code>void serve()</code>, so<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">void serve() &#123;</span><br><span class="line">  // Put all subsequent code here</span><br></pre></td></tr></table></figure></p>
+<p>Create the server socket file descriptor, usually created with with <code>PF_INET</code>, <code>SOCK_STREAM</code>, and with tcp <code>IPPROTO_TCP</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int server_socket_fd;</span><br><span class="line">if ( (server_socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) &lt;= SOCKET_ERROR ) &#123;</span><br><span class="line">  perror(&quot;Error creating the server socket&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Set the socket options, passing in the newly created socket file descriptor.  Additionally, </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int sockopt;</span><br><span class="line">int socket_opts;</span><br><span class="line">if ( (socket_opts = setsockopt(server_socket_fd, SOL_SOCKET, SO_REUSEADDR, &amp;sockopt, sizeof(int))) &lt;= SOCKET_ERROR ) &#123;</span><br><span class="line">  perror(&quot;Error setting the socket options&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Now we need to set up the socket address:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// Create ip address</span><br><span class="line">in_addr_t ip_address;</span><br><span class="line">ip_address = inet_addr();</span><br><span class="line"></span><br><span class="line">struct sockaddr_in socket_address;</span><br><span class="line">// Allocate some memory for the socket_address</span><br><span class="line">memset(&amp;socket_address, 0, sizeof(socket_address));</span><br><span class="line">socket_address.sin_family = AF_INET;</span><br><span class="line">socket_address.sin_addr.s_addr = ip_address;</span><br><span class="line">socket_address.sin_port = htons(PORT);</span><br></pre></td></tr></table></figure>
+<p>Bind the server</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int server;</span><br><span class="line">if ( (server = bind(server_socket_fd, (struct sockaddr *) &amp;socket_address, sizeof(socket_address))) &lt;= SOCKET_ERROR ) &#123;</span><br><span class="line">  perror(&quot;Error binding the server&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Listen for incoming connections</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int connection_listener;</span><br><span class="line">if ( (connection_listener = listen(server_socket_fd, MAX_PENDING_CONNECTIONS)) &lt;= SOCKET_ERROR ) &#123;</span><br><span class="line">  perror(&quot;Error connecting the listener&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Now let’s run the server by running an infinite loop</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">for (;;) &#123;</span><br><span class="line">  int client;</span><br><span class="line">  struct sockaddr_in client_address;</span><br><span class="line">  socklen_t client_len;</span><br><span class="line">  </span><br><span class="line">  client_len = sizeof(client_address);</span><br><span class="line">  </span><br><span class="line">  // Accept incoming connections from the client</span><br><span class="line">  if ( (client = accept(server_socket_fd, (struct sockaddr *) &amp;client_address, &amp;client_len)) &lt;= SOCKET_ERROR ) &#123;</span><br><span class="line">    perror(&quot;Error accepting on the server socket&quot;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // Receive the message</span><br><span class="line">  int receiver;</span><br><span class="line">  if ( (receiver = recv(client, buffer, BUFSIZE - 1, 0)) &lt;= SOCKET_ERROR ) &#123;</span><br><span class="line">    perror(&quot;Error receiving message from the client);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // Respond</span><br><span class="line">  ssize_t sender;</span><br><span class="line">  char response[BUFSIZE];</span><br><span class="line">  size_t len;</span><br><span class="line">  </span><br><span class="line">  strcpy(response, &quot;This is a response string!&quot;);</span><br><span class="line">  len = strlen(response);</span><br><span class="line">  </span><br><span class="line">  if ( (sender = send(client, response, len, 0)) &lt;= SOCKET_ERROR ) &#123;</span><br><span class="line">    perror(&quot;Error sending the response&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  fprintf(stdout, &quot;Successfully sent (%i) message&quot;, sender);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Go ahead, build it, and fire it up and send a curl request.  In a future post, I’ll build an HTTP server.</p>
 
 
                 <hr>
@@ -214,13 +198,9 @@
 
                 <ul class="pager">
                     
-                        <li class="previous">
-                            <a href="/2016/08/11/Writing-a-small-socket-server-in-C/" data-toggle="tooltip" data-placement="top" title="Writing a small socket server in C">&larr; Previous Post</a>
-                        </li>
-                    
                     
                         <li class="next">
-                            <a href="/2016/04/23/Securing-Internet-Routing/" data-toggle="tooltip" data-placement="top" title="Securing Internet Routing">Next Post &rarr;</a>
+                            <a href="/2016/04/28/Understanding-PortLand/" data-toggle="tooltip" data-placement="top" title="Understanding PortLand">Next Post &rarr;</a>
                         </li>
                     
                 </ul>
@@ -254,8 +234,8 @@
 <script type="text/javascript">
     /* * * CONFIGURATION VARIABLES * * */
     var disqus_shortname = "ralucas";
-    var disqus_identifier = "http://ralucas.github.io/2016/04/28/Understanding-PortLand/";
-    var disqus_url = "http://ralucas.github.io/2016/04/28/Understanding-PortLand/";
+    var disqus_identifier = "http://ralucas.github.io/2016/08/11/Writing-a-small-socket-server-in-C/";
+    var disqus_url = "http://ralucas.github.io/2016/08/11/Writing-a-small-socket-server-in-C/";
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

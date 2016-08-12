@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2016-05-04T03:31:44.000Z</updated>
+  <updated>2016-08-12T05:15:22.000Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -14,6 +14,48 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Writing a small socket server in C</title>
+    <link href="http://ralucas.github.io/2016/08/11/Writing-a-small-socket-server-in-C/"/>
+    <id>http://ralucas.github.io/2016/08/11/Writing-a-small-socket-server-in-C/</id>
+    <published>2016-08-12T05:15:22.000Z</published>
+    <updated>2016-08-12T05:15:22.000Z</updated>
+    
+    <content type="html">&lt;p&gt;Building a socket server in C is a great introduction to the language as well as IPC mechanisms such as sockets and it can show you how simple it is to set up a server.  For this installment, we’re going to do a single-threaded version.&lt;/p&gt;
+&lt;p&gt;So, let’s get started…&lt;/p&gt;
+&lt;h3 id=&quot;The-Server&quot;&gt;&lt;a href=&quot;#The-Server&quot; class=&quot;headerlink&quot; title=&quot;The Server&quot;&gt;&lt;/a&gt;The Server&lt;/h3&gt;&lt;p&gt;First I want to define some constants that we’ll use throughout. For some of these you may want to pass these in dynamically, but for this case I’m just hardcoding them here as constants:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;#define SOCKET_ERROR  -1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;#define MAX_PENDING_CONNECTIONS   10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;#define LOCALHOST   &amp;quot;127.0.0.1&amp;quot;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;#define PORT        8080&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;#define BUFSIZE     1024&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;We’ll put the server in a void function that we’ll call serve: &lt;code&gt;void serve()&lt;/code&gt;, so&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;void serve() &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Put all subsequent code here&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;Create the server socket file descriptor, usually created with with &lt;code&gt;PF_INET&lt;/code&gt;, &lt;code&gt;SOCK_STREAM&lt;/code&gt;, and with tcp &lt;code&gt;IPPROTO_TCP&lt;/code&gt;.&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;int server_socket_fd;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;if ( (server_socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  perror(&amp;quot;Error creating the server socket&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;Set the socket options, passing in the newly created socket file descriptor.  Additionally, &lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;int sockopt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;int socket_opts;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;if ( (socket_opts = setsockopt(server_socket_fd, SOL_SOCKET, SO_REUSEADDR, &amp;amp;sockopt, sizeof(int))) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  perror(&amp;quot;Error setting the socket options&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;Now we need to set up the socket address:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;// Create ip address&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;in_addr_t ip_address;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;ip_address = inet_addr();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;struct sockaddr_in socket_address;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;// Allocate some memory for the socket_address&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;memset(&amp;amp;socket_address, 0, sizeof(socket_address));&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;socket_address.sin_family = AF_INET;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;socket_address.sin_addr.s_addr = ip_address;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;socket_address.sin_port = htons(PORT);&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;Bind the server&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;int server;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;if ( (server = bind(server_socket_fd, (struct sockaddr *) &amp;amp;socket_address, sizeof(socket_address))) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  perror(&amp;quot;Error binding the server&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;Listen for incoming connections&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;int connection_listener;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;if ( (connection_listener = listen(server_socket_fd, MAX_PENDING_CONNECTIONS)) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  perror(&amp;quot;Error connecting the listener&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;Now let’s run the server by running an infinite loop&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;31&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;for (;;) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  int client;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  struct sockaddr_in client_address;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  socklen_t client_len;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  client_len = sizeof(client_address);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Accept incoming connections from the client&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if ( (client = accept(server_socket_fd, (struct sockaddr *) &amp;amp;client_address, &amp;amp;client_len)) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    perror(&amp;quot;Error accepting on the server socket&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Receive the message&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  int receiver;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if ( (receiver = recv(client, buffer, BUFSIZE - 1, 0)) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    perror(&amp;quot;Error receiving message from the client);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  // Respond&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  ssize_t sender;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  char response[BUFSIZE];&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  size_t len;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  strcpy(response, &amp;quot;This is a response string!&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  len = strlen(response);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  if ( (sender = send(client, response, len, 0)) &amp;lt;= SOCKET_ERROR ) &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    perror(&amp;quot;Error sending the response&amp;quot;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  fprintf(stdout, &amp;quot;Successfully sent (%i) message&amp;quot;, sender);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;Go ahead, build it, and fire it up and send a curl request.  In a future post, I’ll build an HTTP server.&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Building a socket server in C is a great introduction to the language as well as IPC mechanisms such as sockets and it can show you how s
+    
+    </summary>
+    
+    
+      <category term="sockets" scheme="http://ralucas.github.io/tags/sockets/"/>
+    
+      <category term="C" scheme="http://ralucas.github.io/tags/C/"/>
+    
+      <category term="sys/socket.h" scheme="http://ralucas.github.io/tags/sys-socket-h/"/>
+    
+  </entry>
   
   <entry>
     <title>Understanding PortLand</title>
@@ -964,30 +1006,6 @@
       <category term="Mountaineering" scheme="http://ralucas.github.io/tags/Mountaineering/"/>
     
       <category term="Climbing" scheme="http://ralucas.github.io/tags/Climbing/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello</title>
-    <link href="http://ralucas.github.io/2012/09/23/Hello/"/>
-    <id>http://ralucas.github.io/2012/09/23/Hello/</id>
-    <published>2012-09-24T00:36:49.000Z</published>
-    <updated>2016-04-27T10:44:08.000Z</updated>
-    
-    <content type="html">&lt;p&gt;Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my profile &lt;a href=&quot;https://github.com/ralucas&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@ralucas&lt;/a&gt;, via twitter &lt;a href=&quot;https://twitter.com/r_a_lucas&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@r_a_lucas&lt;/a&gt;, or email richard@richardalucas.com.&lt;/p&gt;
-&lt;p&gt;Cheers!&lt;/p&gt;
-&lt;p&gt;Richard&lt;/p&gt;
-&lt;h2 id=&quot;Current-Projects&quot;&gt;&lt;a href=&quot;#Current-Projects&quot; class=&quot;headerlink&quot; title=&quot;Current Projects:&quot;&gt;&lt;/a&gt;Current Projects:&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;/node-zillow&quot;&gt;Node-Zillow&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my 
-    
-    </summary>
-    
     
   </entry>
   
