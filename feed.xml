@@ -643,9 +643,9 @@
     </summary>
     
     
-      <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
-    
       <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
+    
+      <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
     
   </entry>
   
@@ -774,11 +774,11 @@
     
       <category term="Marathon" scheme="http://ralucas.github.io/tags/Marathon/"/>
     
-      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
-    
       <category term="Cleveland" scheme="http://ralucas.github.io/tags/Cleveland/"/>
     
       <category term="Race Report" scheme="http://ralucas.github.io/tags/Race-Report/"/>
+    
+      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
     
   </entry>
   
@@ -815,9 +815,9 @@
     
       <category term="Marathon" scheme="http://ralucas.github.io/tags/Marathon/"/>
     
-      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
-    
       <category term="Cleveland" scheme="http://ralucas.github.io/tags/Cleveland/"/>
+    
+      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
     
   </entry>
   
@@ -890,24 +890,6 @@
       <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
     
       <category term="Tough Mudder" scheme="http://ralucas.github.io/tags/Tough-Mudder/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Advice from my mistakes</title>
-    <link href="http://ralucas.github.io/2013/01/01/Advice-from-my-mistakes/"/>
-    <id>http://ralucas.github.io/2013/01/01/Advice-from-my-mistakes/</id>
-    <published>2013-01-02T00:43:13.000Z</published>
-    <updated>2015-02-02T00:43:57.000Z</updated>
-    
-    <content type="html">&lt;ol&gt;&lt;br&gt;  &lt;li&gt;Don’t stay in a job you don’t like. Quit or begin looking immediately. Even if you’ve only been there for less than year, get out.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Always work hard and give your best, even if you don’t want to or others don’t seem to appreciate it.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Don’t buy a house unless you have a family, need the room, and plan on staying in the same city for 10 years or more.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Trust your gut.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Read a lot of different books, fiction, non-fiction, religious, whatever floats your boat, read a book about it, then read about something else until you find something you’re interested in.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Don’t watch too much television or Netflix.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Get professional certifications early and make your company pay for them. They may be meaningless, but a lot of hiring folks think they’re something.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Get outside and be active. Hike, camp, fish, run, play a sport, something, it doesn’t matter, just get out there.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Stop reading the dopey news on the internet. It’s probably false anyways.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Master something.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Volunteer.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Get a part-time job or start a side-business.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Accomplish a big goal every year that requires preparation, e.g. run a marathon, start a company, etc.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Don’t fret over your mistakes for too long. Take the hit (no matter how bad) and move on.&lt;/li&gt;&lt;br&gt;  &lt;li&gt;Try to think outside yourself. How are others doing and dealing with life? It really takes the burden off.&lt;/li&gt;&lt;br&gt;&lt;/ol&gt;</content>
-    
-    <summary type="html">
-    
-      &lt;ol&gt;&lt;br&gt;  &lt;li&gt;Don’t stay in a job you don’t like. Quit or begin looking immediately. Even if you’ve only been there for less than year, get 
-    
-    </summary>
-    
     
   </entry>
   
@@ -1008,6 +990,30 @@
       <category term="Mountaineering" scheme="http://ralucas.github.io/tags/Mountaineering/"/>
     
       <category term="Climbing" scheme="http://ralucas.github.io/tags/Climbing/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hello</title>
+    <link href="http://ralucas.github.io/2012/09/23/Hello/"/>
+    <id>http://ralucas.github.io/2012/09/23/Hello/</id>
+    <published>2012-09-24T00:36:49.000Z</published>
+    <updated>2016-04-27T10:44:08.000Z</updated>
+    
+    <content type="html">&lt;p&gt;Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my profile &lt;a href=&quot;https://github.com/ralucas&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@ralucas&lt;/a&gt;, via twitter &lt;a href=&quot;https://twitter.com/r_a_lucas&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;@r_a_lucas&lt;/a&gt;, or email richard@richardalucas.com.&lt;/p&gt;
+&lt;p&gt;Cheers!&lt;/p&gt;
+&lt;p&gt;Richard&lt;/p&gt;
+&lt;h2 id=&quot;Current-Projects&quot;&gt;&lt;a href=&quot;#Current-Projects&quot; class=&quot;headerlink&quot; title=&quot;Current Projects:&quot;&gt;&lt;/a&gt;Current Projects:&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;/node-zillow&quot;&gt;Node-Zillow&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my 
+    
+    </summary>
+    
     
   </entry>
   
