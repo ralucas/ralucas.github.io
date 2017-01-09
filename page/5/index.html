@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Node.js and more...">
+    <meta name="keyword"  content="Node.js, JavaScript, Networking, TCP, Code, Running, HTTP">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Richard Lucas&#39; Blog
+        
+    </title>
+
+    <link rel="canonical" href="http://ralucas.github.io/page/5/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Richard Lucas&#39; Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('/img/orion-nebula.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>Richard Lucas&#39; Blog</h1>
+                    <!--<hr class="small">-->
+                    <span class="subheading">Node.js and more...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+<!-- Main Content -->
+<div class="container">
+    <div class="row">
+        
+
+<!-- USE SIDEBAR -->
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                post-container
+            ">
+            
+                <!-- Main Content -->
+
+
+<div class="post-preview">
+
+    <a href="/2012/09/23/Hello/">
+        <h2 class="post-title">
+            Hello
+        </h2>
+        
+        <div class="post-content-preview">
+            Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my profile @ralucas, via twitter @r_a_lucas, or email richard@r......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Richard Lucas on
+        Sep 23 2012
+    </p>
+
+</div>
+<hr>
+
+
+
+<!-- Pager -->
+
+<ul class="pager">
+    
+        <li class="previous">
+            <a href="/page/4/">&larr; Newer Posts</a>
+        </li>
+    
+    
+</ul>
+
+
+            </div>
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-3 col-lg-offset-0
+                col-md-3 col-md-offset-0
+                col-sm-12
+                col-xs-12
+                sidebar-container
+            ">
+                <!-- Featured Tags -->
+                
+
+                <section>
+                  
+                    
+  <div class="widget-wrap">
+    <h5 class="widget-title">TAGS</h5>
+    <div class="widget tagcloud">
+      <a href="/tags/Actor-Model/" style="font-size: 10px;">Actor Model</a> <a href="/tags/BGP/" style="font-size: 10px;">BGP</a> <a href="/tags/Bufferbloat/" style="font-size: 10px;">Bufferbloat</a> <a href="/tags/C/" style="font-size: 10px;">C</a> <a href="/tags/CLI/" style="font-size: 10px;">CLI</a> <a href="/tags/CSV/" style="font-size: 10px;">CSV</a> <a href="/tags/Cleveland/" style="font-size: 13.33px;">Cleveland</a> <a href="/tags/Climbing/" style="font-size: 10px;">Climbing</a> <a href="/tags/CoDel/" style="font-size: 10px;">CoDel</a> <a href="/tags/Concurrency/" style="font-size: 10px;">Concurrency</a> <a href="/tags/DASH/" style="font-size: 10px;">DASH</a> <a href="/tags/Data-centers/" style="font-size: 13.33px;">Data centers</a> <a href="/tags/Distributed-Computing/" style="font-size: 10px;">Distributed Computing</a> <a href="/tags/Erlang/" style="font-size: 10px;">Erlang</a> <a href="/tags/Ethernet/" style="font-size: 10px;">Ethernet</a> <a href="/tags/HTTP/" style="font-size: 10px;">HTTP</a> <a href="/tags/Injury/" style="font-size: 10px;">Injury</a> <a href="/tags/JavaScript/" style="font-size: 10px;">JavaScript</a> <a href="/tags/Jellyfish/" style="font-size: 10px;">Jellyfish</a> <a href="/tags/Linux/" style="font-size: 10px;">Linux</a> <a href="/tags/Linux-Mint/" style="font-size: 10px;">Linux Mint</a> <a href="/tags/Marathon/" style="font-size: 13.33px;">Marathon</a> <a href="/tags/Mockery/" style="font-size: 10px;">Mockery</a> <a href="/tags/Mountaineer-s-Route/" style="font-size: 10px;">Mountaineer's Route</a> <a href="/tags/Mountaineering/" style="font-size: 10px;">Mountaineering</a> <a href="/tags/Mt-Whitney/" style="font-size: 10px;">Mt. Whitney</a> <a href="/tags/Networking/" style="font-size: 20px;">Networking</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Poem/" style="font-size: 10px;">Poem</a> <a href="/tags/PortLand/" style="font-size: 10px;">PortLand</a> <a href="/tags/Postgres/" style="font-size: 13.33px;">Postgres</a> <a href="/tags/Queue-delay/" style="font-size: 10px;">Queue delay</a> <a href="/tags/Race-Report/" style="font-size: 10px;">Race Report</a> <a href="/tags/Raymond-Carver/" style="font-size: 10px;">Raymond Carver</a> <a href="/tags/Request/" style="font-size: 10px;">Request</a> <a href="/tags/Router-buffers/" style="font-size: 13.33px;">Router buffers</a> <a href="/tags/Routing/" style="font-size: 10px;">Routing</a> <a href="/tags/Running/" style="font-size: 16.67px;">Running</a> <a href="/tags/Scaling/" style="font-size: 10px;">Scaling</a> <a href="/tags/Security/" style="font-size: 10px;">Security</a> <a href="/tags/Sinon-js/" style="font-size: 10px;">Sinon.js</a> <a href="/tags/Streaming/" style="font-size: 10px;">Streaming</a> <a href="/tags/Supplant/" style="font-size: 10px;">Supplant</a> <a href="/tags/TCP/" style="font-size: 13.33px;">TCP</a> <a href="/tags/Templating/" style="font-size: 10px;">Templating</a> <a href="/tags/Testing/" style="font-size: 10px;">Testing</a> <a href="/tags/Tough-Mudder/" style="font-size: 10px;">Tough Mudder</a> <a href="/tags/imagemagick/" style="font-size: 10px;">imagemagick</a> <a href="/tags/resizing-images/" style="font-size: 10px;">resizing images</a> <a href="/tags/sockets/" style="font-size: 10px;">sockets</a> <a href="/tags/sys-socket-h/" style="font-size: 10px;">sys/socket.h</a>
+    </div>
+  </div>
+
+
+                  
+                    <div class="widget-wrap">
+  <hr/>
+  <!--<h5 class="widget-title">QUOTE</h5>-->
+  <div class="widget">
+    <p><blockquote>“Most people are other people. Their thoughts are someone else’s opinions, their lives a mimicry, their passions a quotation.”</blockquote></p>
+    <p>—Oscar Wilde</p>
+  </div>
+</div>
+
+                  
+                </section>
+                <!-- Short About -->
+                <section class="visible-md visible-lg">
+                    <hr><h5><a href="/about/">ABOUT ME</a></h5>
+                    <div class="short-about">
+
+                        
+                            <img src="http://ralucas.github.io//img/whitney.jpeg" />
+                        
+
+                        
+                            <p>My blog about Node.js and other software topics I&#39;m interested in.</p>
+                        
+
+                        <!-- SNS Link -->
+                        <ul class="list-inline">
+                            
+                                <li>
+                                    <a href="/feed.xml">
+                                        <span class="fa-stack fa-lg">
+                                            <i class="fa fa-circle fa-stack-2x"></i>
+                                            <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                </li>
+                            
+                            
+                                <li>
+                                    <a target="_blank" href="https://twitter.com/r_a_lucas">
+                                        <span class="fa-stack fa-lg">
+                                            <i class="fa fa-circle fa-stack-2x"></i>
+                                            <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                </li>
+                            
+                            
+
+                            
+
+                            
+
+                            
+                                <li>
+                                    <a target="_blank"  href="https://github.com/ralucas">
+                                        <span class="fa-stack fa-lg">
+                                            <i class="fa fa-circle fa-stack-2x"></i>
+                                            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                </li>
+                            
+                            
+                        </ul>
+                    </div>
+                </section>
+                
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="http://www.rangeandroam.com">Range &amp; Roam</a></li>
+                    
+                        <li><a href="http://www.richardalucas.com">Personal Site</a></li>
+                    
+                        <li><a href="http://www.helprequester.com">Help Requester</a></li>
+                    
+                </ul>
+                
+            </div>
+        
+    </div>
+</div>
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/r_a_lucas">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="mailto:richard@richardalucas.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/ralucas">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Richard Lucas&#39; Blog 2017 
+                    <br>
+                    Contact at <a href="mailto:richard@richardalucas.com">richard@richardalucas.com</a> 
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://ralucas.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-50082017-4';
+    var _gaDomain = 'blog.richardalucas.com';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="http://ralucas.github.io/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2016-08-12T05:27:11.000Z</updated>
+  <updated>2017-01-09T08:13:47.000Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -14,6 +14,88 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Actor Model in Erlang</title>
+    <link href="http://ralucas.github.io/2017/01/09/Actor-Model-in-Erlang/"/>
+    <id>http://ralucas.github.io/2017/01/09/Actor-Model-in-Erlang/</id>
+    <published>2017-01-09T08:13:46.000Z</published>
+    <updated>2017-01-09T08:13:47.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a>Concurrency</h3><p><em>Definition:</em> The ability of an executing program to run decomposed instructions in a parallelized fashion efficiently utilizing available resources.</p>
+<p>From Joe Armstrong [10]:<br><img src="resources/674F0D37FCA4FAC1BD2DF28A2B78E633.jpg" alt="con_and_par.jpg"></p>
+<p>The way to phrase it, in my mind, is parallelism differs in that it is a purely physical difference, i.e. running the same program at the same time across similar devices, whereas concurrency infers running on the same machine (i.e. use of threads). But for the sake of this discussion, they may be used interchangeably</p>
+<h3 id="Traditional-Concurrency"><a href="#Traditional-Concurrency" class="headerlink" title="Traditional Concurrency"></a>Traditional Concurrency</h3><p>Programming languages typically offer concurrent operation through the use of threads.  Given the lack of atomicity in the use of threads, locking primitives such as semaphores or mutexes are required. This can create difficult to program and debug situations, such as deadlock. For brevity, this survey assumes some knowledge of current concurrency models.</p>
+<h3 id="Thinking-about-Parallelization"><a href="#Thinking-about-Parallelization" class="headerlink" title="Thinking about Parallelization"></a>Thinking about Parallelization</h3><p>Obviously, computing speeds have continued their march to the beat of Moore’s Law, and given the complexity in writing concurrent programs that take advantage of the processors and architectures at the time, it’s not always worth it to consider writing software in this way. But there’s speculation that we may begin to see the perhaps potential physical limitations: there’s only so many transistors you can continue to fit into ever smaller physical areas.  </p>
+<p>So, the use of parallelization becomes more and more attractive.  Amdahl’s Law basically gives a good rule of thumb for how parallelized a program can get [My definition]:</p>
+<blockquote>
+<p>A program is only parallelizable in terms of it’s slowest part.</p>
+</blockquote>
+<p><img src="resources/B7F87CBB6DDA25AE976B6382BFE40BF6.png" alt="AmdahlsLaw.svg.png"></p>
+<h2 id="Actor-Model"><a href="#Actor-Model" class="headerlink" title="Actor Model"></a>Actor Model</h2><p>Actors are a concurrency primitive that do not share resources with another actor. They share state/data via message passing.</p>
+<p>An actor is an entity that has a mailbox and a behavior. It takes a message and can then send messages to other actors, create new actors, and return another actor describing its next behavior.</p>
+<blockquote>
+<p>Concurrency in actors is constrained only by the availability of hardware resources and by the logical-dependence inherent in the computation. - Gul Agha [1]</p>
+</blockquote>
+<p>The actor model is a framework to think about, model, and build distributed concurrent systems.</p>
+<h3 id="Quick-History"><a href="#Quick-History" class="headerlink" title="Quick History"></a>Quick History</h3><p>The Actor Model was first proposed by Carl Hewitt in 1973 (yeah, the actor model is fully entrenched in middle age :))  It was further solidified over many years by a number of other computer scientists and by Gul Agha in his disseration on the Actor Model in 1985 [1].</p>
+<h3 id="Important-Concepts"><a href="#Important-Concepts" class="headerlink" title="Important Concepts"></a>Important Concepts</h3><ol>
+<li>No shared state between actors</li>
+<li>Functions asynchronously</li>
+<li>All about message passing for communication<ol>
+<li>Only way to share/change state is through this message passing</li>
+</ol>
+</li>
+</ol>
+<h3 id="Enter-Erlang…"><a href="#Enter-Erlang…" class="headerlink" title="Enter Erlang…"></a>Enter Erlang…</h3><p>The actor model is inherent to Erlang and is built into the language and somewhat fundamental to understanding the distributed nature of Erlang. </p>
+<p>One thing to note, is Erlang was designed for the telephony industry, so some of the driving ideals such as <em>reliability</em> demanded that Erlang utilize a model that didn’t incur potential for data loss, that is possible in the more traditional concurrency models discussed above.</p>
+<blockquote>
+<p>An Erlang program describes a series of functions. Each function uses pattern matching to determine which function to execute.[6]</p>
+</blockquote>
+<p>In Erlang, each thread of execution is a lightweight process.[4] </p>
+<p>Erlang utilizes pattern matching to process messages.</p>
+<blockquote>
+<p>The Erlang view of the world is that everything is a process and that processes can interact only by exchanging messages. - Joe Armstrong [7]</p>
+</blockquote>
+<h4 id="Creating-a-process"><a href="#Creating-a-process" class="headerlink" title="Creating a process"></a>Creating a process</h4><p>To create a process in Erlang, just call <code>spawn</code>, which will return a process id (pid) (refer to the Erlang docs for the signature of <code>spawn</code> you want).  Here, the example uses <code>spawn/3</code> (<code>spawn(Module, Function, Args) -&gt; pid()</code>) [5]<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">-module(actor_file).</div><div class="line">...</div><div class="line">start() -&gt; </div><div class="line">  spawn(actor_file, run, []).</div></pre></td></tr></table></figure></p>
+<p>Calling <code>start/0</code> here returns the pid:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1&gt; c(actor_file).</div><div class="line">2&gt; Pid = actor_file:start().</div><div class="line">3&gt; Pid.</div><div class="line">&lt;0.80.0&gt;</div></pre></td></tr></table></figure></p>
+<p>But it’s not a process in the OS definition. It’s an Erlang process, so it runs in the Erlang VM. It runs in user space, not bound to the kernel, so is scheduled by the Erlang Scheduler. </p>
+<p>And it’s a lightweight process…how lightweight: </p>
+<blockquote>
+<p>A newly spawned Erlang process uses 309 words of memory [4] </p>
+</blockquote>
+<p>From the Erlang docs on memory:</p>
+<blockquote>
+<p>The unit of measurement is memory words. There exists both a 32-bit and a 64-bit implementation. A word is therefore 4 bytes or 8 bytes, respectively. [6]</p>
+</blockquote>
+<p>In fact, let’s check how much memory our process(es) are using:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&#123;_,Bytes&#125; = process_info(actor_file:start(), memory).</div><div class="line">  &#123;memory,2720&#125;</div></pre></td></tr></table></figure></p>
+<p>And they are very quick to spawn…from Joe Armstrong:</p>
+<blockquote>
+<p>Spawning 20,000 processes took an average of 3.0 microseconds/process of CPU time and 3.4 microseconds of elapsed (wall-clock) time.</p>
+</blockquote>
+<h3 id="How-Erlang-schedules-a-process"><a href="#How-Erlang-schedules-a-process" class="headerlink" title="How Erlang schedules a process"></a>How Erlang schedules a process</h3><p>Erlang uses a preemptive scheduler. A preemptive scheduler works by running tasks, preempting, then resuming them based on a specific metric, such as priority, time or reduction.  Many other async languages, such as Node.js and Python’s Twisted, utilize cooperative scheduling, which requires tasks to release themselves voluntarily.</p>
+<p>Erlang’s preemptive scheduler uses a reduction count. A reduction is typically a function call, garbage collection, message sending, etc. The reduction count for an Erlang process is 2000, which can go quite quickly.</p>
+<p>Additionally, processes do and can be flagged with priorities: ‘max’, ‘high’, ‘normal’, and ‘low’.</p>
+<p>The scheduler makes Erlang a great choice for low-latency, parallelized programs as it can manage multi-tasking efficiently, given that it doesn’t allow any one process to monopolize resources.</p>
+<h3 id="References-and-Further-Reading"><a href="#References-and-Further-Reading" class="headerlink" title="References and Further Reading"></a>References and Further Reading</h3><p>[1] Agha, Gul, <em>Actors: A Model of Concurrent Computation in Distributed Systems</em>, <a href="http://www.cypherpunks.to/erights/history/actors/AITR-844.pdf" target="_blank" rel="external">http://www.cypherpunks.to/erights/history/actors/AITR-844.pdf</a>, 1985.<br>[2] Vermeersch, Ruben, <em>Concurrency in Erlang &amp; Scala: The Actor Model</em> <a href="https://rocketeer.be/articles/concurrency-in-erlang-scala" target="_blank" rel="external">https://rocketeer.be/articles/concurrency-in-erlang-scala</a>, 2009.<br>[3] Hebert, Fred, The Hitchhiker’s Guide to Concurrency, <em>Learn You Some Erlang: for great good!</em>, <a href="http://learnyousomeerlang.com/the-hitchhikers-guide-to-concurrency" target="_blank" rel="external">http://learnyousomeerlang.com/the-hitchhikers-guide-to-concurrency</a>, 2013.<br>[4] Erlang/OTP System Documentation, <a href="http://erlang.org/doc/index.html" target="_blank" rel="external">http://erlang.org/doc/index.html</a>, 2016<br>[5] <a href="http://erlang.org/doc/reference_manual/processes.html" target="_blank" rel="external">http://erlang.org/doc/reference_manual/processes.html</a><br>[6] <a href="http://erlang.org/doc/efficiency_guide/advanced.html" target="_blank" rel="external">http://erlang.org/doc/efficiency_guide/advanced.html</a><br>[7] Armstrong, Joe. <em>Programming Erlang: Software for a Concurrent World</em>, 2nd Ed, 2013.<br>[8] Tate, Bruce. <em>Crossing borders: Concurrent programming with Erlang</em>, <a href="http://www.ibm.com/developerworks/java/library/j-cb04186/j-cb04186-pdf.pdf" target="_blank" rel="external">http://www.ibm.com/developerworks/java/library/j-cb04186/j-cb04186-pdf.pdf</a>, 2006.<br>[9] <a href="https://hamidreza-s.github.io/erlang/scheduling/real-time/preemptive/migration/2016/02/09/erlang-scheduler-details.html" target="_blank" rel="external">https://hamidreza-s.github.io/erlang/scheduling/real-time/preemptive/migration/2016/02/09/erlang-scheduler-details.html</a><br>[10] <a href="http://joearms.github.io/2013/04/05/concurrent-and-parallel-programming.html" target="_blank" rel="external">http://joearms.github.io/2013/04/05/concurrent-and-parallel-programming.html</a><br>[11] <a href="http://yosefk.com/blog/parallelism-and-concurrency-need-different-tools.html" target="_blank" rel="external">http://yosefk.com/blog/parallelism-and-concurrency-need-different-tools.html</a><br>[12]  Andersen, Jesper Louis&gt; <em>How Erlang does scheduling</em>, <a href="http://jlouisramblings.blogspot.co.uk/2013/01/how-erlang-does-scheduling.html" target="_blank" rel="external">http://jlouisramblings.blogspot.co.uk/2013/01/how-erlang-does-scheduling.html</a>, 2013.</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;Concurrency&quot;&gt;&lt;a href=&quot;#Concurrency&quot; class=&quot;headerlink&quot; title=&quot;Concurrency&quot;&gt;&lt;/a&gt;Concurrency&lt;/h3&gt;&lt;p&gt;&lt;em&gt;Definition:&lt;/em&gt; The ability o
+    
+    </summary>
+    
+    
+      <category term="Erlang" scheme="http://ralucas.github.io/tags/Erlang/"/>
+    
+      <category term="Actor Model" scheme="http://ralucas.github.io/tags/Actor-Model/"/>
+    
+      <category term="Concurrency" scheme="http://ralucas.github.io/tags/Concurrency/"/>
+    
+      <category term="Distributed Computing" scheme="http://ralucas.github.io/tags/Distributed-Computing/"/>
+    
+  </entry>
   
   <entry>
     <title>Writing a small socket server in C</title>
@@ -643,9 +725,9 @@
     </summary>
     
     
-      <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
-    
       <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
+    
+      <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
     
   </entry>
   
@@ -990,30 +1072,6 @@
       <category term="Mountaineering" scheme="http://ralucas.github.io/tags/Mountaineering/"/>
     
       <category term="Climbing" scheme="http://ralucas.github.io/tags/Climbing/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello</title>
-    <link href="http://ralucas.github.io/2012/09/23/Hello/"/>
-    <id>http://ralucas.github.io/2012/09/23/Hello/</id>
-    <published>2012-09-24T00:36:49.000Z</published>
-    <updated>2016-04-27T10:44:08.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my profile <a href="https://github.com/ralucas" target="_blank" rel="external">@ralucas</a>, via twitter <a href="https://twitter.com/r_a_lucas" target="_blank" rel="external">@r_a_lucas</a>, or email richard@richardalucas.com.</p>
-<p>Cheers!</p>
-<p>Richard</p>
-<h2 id="Current-Projects"><a href="#Current-Projects" class="headerlink" title="Current Projects:"></a>Current Projects:</h2><ul>
-<li><a href="/node-zillow">Node-Zillow</a></li>
-</ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Welcome to my Github Blog and Projects Blog. I focus mostly on Node.js and Javascript. Please feel free to message me anytime through my 
-    
-    </summary>
-    
     
   </entry>
   
