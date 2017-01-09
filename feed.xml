@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2017-01-09T08:13:47.000Z</updated>
+  <updated>2017-01-09T08:17:36.000Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -20,10 +20,10 @@
     <link href="http://ralucas.github.io/2017/01/09/Actor-Model-in-Erlang/"/>
     <id>http://ralucas.github.io/2017/01/09/Actor-Model-in-Erlang/</id>
     <published>2017-01-09T08:13:46.000Z</published>
-    <updated>2017-01-09T08:13:47.000Z</updated>
+    <updated>2017-01-09T08:17:36.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a>Concurrency</h3><p><em>Definition:</em> The ability of an executing program to run decomposed instructions in a parallelized fashion efficiently utilizing available resources.</p>
-<p>From Joe Armstrong [10]:<br><img src="resources/674F0D37FCA4FAC1BD2DF28A2B78E633.jpg" alt="con_and_par.jpg"></p>
+<p>From Joe Armstrong [10]:<br><img src="/resources/674F0D37FCA4FAC1BD2DF28A2B78E633.jpg" alt="con_and_par.jpg"></p>
 <p>The way to phrase it, in my mind, is parallelism differs in that it is a purely physical difference, i.e. running the same program at the same time across similar devices, whereas concurrency infers running on the same machine (i.e. use of threads). But for the sake of this discussion, they may be used interchangeably</p>
 <h3 id="Traditional-Concurrency"><a href="#Traditional-Concurrency" class="headerlink" title="Traditional Concurrency"></a>Traditional Concurrency</h3><p>Programming languages typically offer concurrent operation through the use of threads.  Given the lack of atomicity in the use of threads, locking primitives such as semaphores or mutexes are required. This can create difficult to program and debug situations, such as deadlock. For brevity, this survey assumes some knowledge of current concurrency models.</p>
 <h3 id="Thinking-about-Parallelization"><a href="#Thinking-about-Parallelization" class="headerlink" title="Thinking about Parallelization"></a>Thinking about Parallelization</h3><p>Obviously, computing speeds have continued their march to the beat of Moore’s Law, and given the complexity in writing concurrent programs that take advantage of the processors and architectures at the time, it’s not always worth it to consider writing software in this way. But there’s speculation that we may begin to see the perhaps potential physical limitations: there’s only so many transistors you can continue to fit into ever smaller physical areas.  </p>
@@ -31,7 +31,7 @@
 <blockquote>
 <p>A program is only parallelizable in terms of it’s slowest part.</p>
 </blockquote>
-<p><img src="resources/B7F87CBB6DDA25AE976B6382BFE40BF6.png" alt="AmdahlsLaw.svg.png"></p>
+<p><img src="/resources/B7F87CBB6DDA25AE976B6382BFE40BF6.png" alt="AmdahlsLaw.svg.png"></p>
 <h2 id="Actor-Model"><a href="#Actor-Model" class="headerlink" title="Actor Model"></a>Actor Model</h2><p>Actors are a concurrency primitive that do not share resources with another actor. They share state/data via message passing.</p>
 <p>An actor is an entity that has a mailbox and a behavior. It takes a message and can then send messages to other actors, create new actors, and return another actor describing its next behavior.</p>
 <blockquote>
