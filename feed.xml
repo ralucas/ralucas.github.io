@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2017-01-09T08:17:36.000Z</updated>
+  <updated>2018-01-08T01:03:29.934Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -14,6 +14,127 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Activity Classification using MHI Techniques</title>
+    <link href="http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/"/>
+    <id>http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/</id>
+    <published>2017-12-03T07:00:00.000Z</published>
+    <updated>2018-01-08T01:03:29.934Z</updated>
+    
+    <content type="html"><![CDATA[<p><em>Activity classification by computers has a rich history and this paper seeks to describe, analyze, and compare some methods used in classifying a subset of actions. The creation of temporal templates via motion-energy images (MEI) and motion history images (MHI) were utilized to analyze and quantify frames of videos. Image moments were taken from the MHIs and a learning model was built. The results obtained are compared and discussed along with other comparative methods. The activities focused on were boxing, handclapping, handwaving, running, jogging, and walking.</em></p>
+<h2 id="Interesting-Links"><a href="#Interesting-Links" class="headerlink" title="Interesting Links"></a>Interesting Links</h2><ul>
+<li><p><strong>Multiple Activity Videos:</strong></p>
+<ul>
+<li><p>Handclapping &amp; Boxing Video <a href="https://youtu.be/dEtfgAYwCg4" target="_blank" rel="external">https://youtu.be/dEtfgAYwCg4</a></p>
+</li>
+<li><p>Multitude activity Video <a href="https://youtu.be/x_hFKZzc0jw" target="_blank" rel="external">https://youtu.be/x_hFKZzc0jw</a></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Related-work-in-recently-published-research"><a href="#Related-work-in-recently-published-research" class="headerlink" title="Related work in recently published research"></a>Related work in recently published research</h2><p>There are a number of research publications that are directly related to activity classification, although some of their methods may vary. The most pertinent related work to this project is that of Bobick and Davis [link][5], in which the idea of using temporal templates to classify activities is discussed. This technique relies primarily on the creation of Motion-energy images and Motion-history images to create a temporal template. Image moments are then extracted from these templates and a distance model is created.</p>
+<p>An alternative to temporal templates is suggested in Schuldt, et al [8] in which the use of space-time features are used with a support vector machine classifier. The space-time features are, in essence, points of interest that occur at specific points over time allowing patterns to be developed. They are constructed through the use of image gradients and a Gaussian convolution kernel in which points of interest are located in comparison to a maxima. The use of SVMs in training a model are then taken to achieve fairly good results (and will be compared later herein).</p>
+<p>In more recent work, the use of still poses and poselets (body part detection from joint and part positions) [7] to develop an underlying stick figure representation found good results in identifying activities. Additionally, this research took into account the 3D orientation from a trained model. The method achieved results of ~60%<br>correct identification with just the poselet representation and ~65% when the object model was added. Another recent study [3] utilized summary dynamic rgb images and convolution neural network (CNN) to develop a system in which identification was done quickly and reasonably successfully as the researchers were able to get ~89% successful identification.</p>
+<h2 id="Methodology-and-implementation-used"><a href="#Methodology-and-implementation-used" class="headerlink" title="Methodology and implementation used"></a>Methodology and implementation used</h2><p>Temporal templates were used to create modeled images over a period of time, traditional image moments [9][4][6][2] were then taken and a model was trained.</p>
+<h3 id="Temporal-Templates"><a href="#Temporal-Templates" class="headerlink" title="Temporal Templates"></a>Temporal Templates</h3><p>Two types of temporal templates were created: motion-energy images (or binary images) (MEIs) and motion-history images (MHIs). In creating these images, each video frame was taken through a preprocessing step in order to better extract the purposeful, activity related motion from the<br>background and tangential motions within each frame. This was done b first grayscaling each frame, then running the frame through OpenCV Gaussian blurring and morphing functions.</p>
+<p>The MEIs were created by taking a temporal diff from each frame and assigning coordinates with a 0 or 1 given if the temporal difference was greater than a constant $\theta$ or not (see examples in figure 1). A $\theta$ of $14$ was used throughout the training and testing phases as it was determined to give the best results.</p>
+<p><img src="resources/A19C0C2A9DEED833992394DAB24C3EE7.png =160x120" alt="mei_image_boxing_person05_d3_10.png"> <img src="resources/ADC2C3C9010B694FB9C870F47C89C5EF.png =160x120" alt="mei_image_handwaving_person01_d3_12.png"></p>
+<p><img src="resources/206EF4CD0F290B8C44E39F800AAF6826.png =160x120" alt="mei_image_walking_person04_d3_20.png"> <img src="resources/889A6EB6627389DACAA15AFCB8DDBE01.png =160x120" alt="mei_image_handclapping_person05_d3_4.png"></p>
+<p><img src="resources/58CCB63298A0D0C74797DC0B6133BE59.png =160x120" alt="mei_image_jogging_person04_d3_0.png"> <img src="resources/646C7B58F989519A1C2838B9718699DF.png =160x120" alt="mei_image_running_person05_d3_2.png"><br><strong>Figure 1</strong>: <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em></p>
+<p>The MHIs were built from those binary images and provide a more nuanced and graded view of the motion over time. These were calculated utilizing hand-crafted constants $\tau$, in which over time gradients were developed. Figure 2 shows an example of different people handwaving as it shows more of the change over time versus the constant that the MEIs show.</p>
+<p>In creation of these temporal templates, the $\tau$ constant value for each activity was additionally used (Table 1) a demarcation for how many frames to analyze from a video, so the video sequences (as outlined in the sequences[1]) were divided further into small $\tau$ based<br>chunks. This allowed for consistent training of an activity and expanding the total number of training samples, therefore giving more to the trained model to improve upon prediction.</p>
+<p>  | ————– | – |<br>  | boxing         | 7  |<br>  | handclapping   | 13 |<br>  | handwaving     | 17 |<br>  | jogging        | 21 |<br>  | running        | 11 |<br>  | walking        | 35 |<br><em>Table 1</em></p>
+<p><img src="resources/31DF5A4229040E941925BCAA6766B5A9.png =160x120" alt="mhi_image_boxing_person04_d3_3.png"> <img src="resources/A5627A0DA267394D6B3BE27EC2A0AB91.png =160x120" alt="mhi_image_handwaving_person05_d3_30.png"></p>
+<p><img src="resources/5DAB00468AFD541B0A7E0165381C3E02.png =160x120" alt="mhi_image_walking_person05_d3_7.png"> <img src="resources/F1E8F01CB2227A18975836934E58F422.png =160x120" alt="mhi_image_handclapping_person03_d3_6.png"></p>
+<p><img src="resources/E56FAD24DF1E1D637212375E26C0A87D.png =160x120" alt="mhi_image_jogging_person02_d3_7.png"> <img src="resources/70539DBC7EF87041DC08B733DFDD0242.png =160x120" alt="mhi_image_running_person05_d3_10.png"></p>
+<p><strong>Figure 2:</strong> <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em> </p>
+<h3 id="Image-Moments"><a href="#Image-Moments" class="headerlink" title="Image Moments"></a>Image Moments</h3><p>Image moments for each MHI were taken to develop a feature set upon<br>which the temporal templates could be compared. The central ($\mu$) and<br>scale invariant ($\nu$) moments were calculated for the following<br>moments $pq \in {20, 11, 02, 30, 21, 12, 03, 22}$ [4]. The 7<br>main Hu Moments [6][2] were then calculated from the scale<br>invariant moments. However, after much testing and training, it was<br>determined that the scale invariant moments gave the best results.</p>
+<h3 id="Training-and-Prediction"><a href="#Training-and-Prediction" class="headerlink" title="Training and Prediction"></a>Training and Prediction</h3><p>A large dataset of videos [1] was used as input for training. The<br>K-nearest neighbor algorithm was used to train, classify, and predict<br>the videos. The K-nearest neighbor algorithm works by classifying input<br>based on a plurality vote of nearest neighbors. The features used for<br>training and prediction for this dataset was found to be a combination<br>of the scale invariant features ($\nu$) and the Hu moments. The primary<br>factor here was, in using the Hu moments as features, that enough<br>differentiation was not provided and there was an increase in false<br>positives when testing.</p>
+<h2 id="Results-and-performance-statistics"><a href="#Results-and-performance-statistics" class="headerlink" title="Results and performance statistics"></a>Results and performance statistics</h2><p><em>Figure 3: Training results | 90.8% accuracy</em><br><img src="resources/5EC509D8F11D712DBCE8FF4606A860E2.png =460x345" alt="training.png"></p>
+<p><em>Figure 4: Test results | 84.1% accuracy</em><br><img src="resources/64911BF7A62AE57DF347A9A11D123452.png =460x345" alt="test.png"></p>
+<p>Figures 3 and 4 give a confusion matrix on the overall results from<br>training and testing.</p>
+<h3 id="Experiment"><a href="#Experiment" class="headerlink" title="Experiment"></a>Experiment</h3><p>In addition to the single activity videos used to train and test<br>against, videos with multiple activities within the same video were run<br>as an experiment (sample frames in Figure 6). The method used for each<br>multiple activity video did the following:</p>
+<p><em>Labels = Dictionary of labels $\rightarrow$ $\tau$ values</em> initialize<br><span>$Frame_List=1 + max(\tau)$</span></p>
+<p>As outlined in Algorithm [dmap], multiple activity prediction, first<br>gets an initial prediction by building an array of frames. Then as that<br>frame list is iterated over and $mei$ and $mhi$ images are built, when<br>the number of frames is equal to a $\tau$ value, a prediction from the<br>predict engine is created based on the current $mhi$ values and that<br>prediction is compared to the current $\tau$ label. If they are equal,<br>then that label is returned and a $\tau$ number of frames is written and<br>classified with that label.</p>
+<h2 id="Analysis-of-results"><a href="#Analysis-of-results" class="headerlink" title="Analysis of results"></a>Analysis of results</h2><p>The six activities could be further categorized into two primary groups:<br>stationary activities and moving activities. Given this, focus can be<br>placed on results within these categories. The most glaring issue is<br>that of the <em>handclapping</em> results. The trainer most commonly confused<br>it with <em>handwaving</em> and <em>boxing</em>, which does have similar motions.</p>
+<p>The moving activities also were difficult to separate, and particularly<br><em>running</em> and <em>jogging</em> proved to be quite difficult to distinguish<br>between. However, given reasonably differentiated $\tau$ values, the<br>variation was carried through. It could also be argued that the<br>difference between jogging and running may be quite different from<br>person to person, so I still believe that these two classifications are<br>somewhat interchangeable.</p>
+<h3 id="Analysis-of-experiment"><a href="#Analysis-of-experiment" class="headerlink" title="Analysis of experiment"></a>Analysis of experiment</h3><p>As shown in Table 2, the performance times of algorithm used<br>in the experiment was fairly slow. It took close to half a second to<br>complete a full run of the algorithm of frame set analysis and write,<br>which entails running the algorithm (see above) and write the newly<br>labeled frames to video.</p>
+<p>  ————————————- | ——–<br>  Frames (36) analysis and prediction   |   0.45s<br>  Moments calculation:                  |  0.013s<br>  Temporal image creation               |   0.15s</p>
+<p><em>Table 2</em></p>
+<p>The accuracy of the multiple activity videos was hit-or-miss. For<br>example, in the video of just <em>handclapping</em> and <em>boxing</em>, the accuracy<br>was outstanding, showing an above 90% accuracy (see Figure 5). However,<br>in the multitude activity video, accuracy declined. Some of this was due<br>to the definition of <em>jogging</em> versus <em>running</em>, but there were also<br>misclassifications (see Figure 6). Throughout the multiple activity<br>videos, there were misclassifications (see Figure 11), mostly among<br>their two major groups (as discussed above), i.e. <em>walking</em> getting<br>classified as <em>jogging</em>, <em>boxing</em> as <em>handclapping</em>, etc.</p>
+<p><em>Figure 5: Handclapping and Boxing | 90.7% accuracy</em><br><img src="resources/4E165FF834E416F58336EF37445CE402.png =460x345" alt="handclapping_boxing_matrix.png"><br><em>N.B. $nan$ means that label was not expected</em></p>
+<p><em>Figure 6: Multitude | 36.4% accuracy</em><br><img src="resources/2F9E7EA10E826520B4DB2FED7F3AEDAB.png =460x345" alt="multitude_matrix.png"><br><em>N.B. $nan$ means that label was not expected</em></p>
+<p><img src="resources/095BFCDDB5ACD1A9E10E6C8440C2341E.png =284x160" alt="experiment_1_160.png"> <img src="resources/5EC4CE79902E1C304DCE17A1B94331B7.png =284x160" alt="experiment_3_1232.png"></p>
+<p><img src="resources/89A45B61265B78D82C15B9CCBC5BD161.png =284x160" alt="experiment_2_1096.png"> <img src="resources/F101A2C26F3D379CA8E578F7C3D761C4.png =284x160" alt="experiment_2_524.png"></p>
+<p><img src="resources/A715ADD3B15BCD043840813FC32E721F.png =284x160" alt="experiment_3_468.png"> <img src="resources/FB3BA8C32C0C1DFFB7DD20B769DA7645.png =284x160" alt="experiment_1_1076.png"></p>
+<p><strong>Figure 7:</strong> <em>Clockwise, starting in left corner: Boxing (correctly identified), Handwaving (incorrectly identified as clapping), Boxing (incorrectly identified as waving), Running (incorrectly identified as jogging), Walking (incorrectly identified as jogging), Handwaving (correctly identified</em></p>
+<h3 id="Analysis-of-weaknesses"><a href="#Analysis-of-weaknesses" class="headerlink" title="Analysis of weaknesses"></a>Analysis of weaknesses</h3><p>There were some weaknesses that came to light in running these<br>predictions:</p>
+<ul>
+<li><p>Currently the method requires differing $\tau$ values or if they are<br>similar, quite different $mhi$ images.</p>
+</li>
+<li><p>All the $\tau$ values were carefully set and vetted. Simply not a<br>scalable process.</p>
+</li>
+<li><p>As the discussed above, the performance speed is quite slow.</p>
+</li>
+<li><p>Still a fairly custom and brittle development process.</p>
+</li>
+</ul>
+<h2 id="Comparison-to-the-state-of-the-art-methods"><a href="#Comparison-to-the-state-of-the-art-methods" class="headerlink" title="Comparison to the state-of-the-art methods"></a>Comparison to the state-of-the-art methods</h2><p>In comparison of the methodology used to the state-of-the-art methods,<br>we can look at the results obtained from usage of an identical dataset<br>from the Schuldt, et al [8]. In comparing the confusion matrices<br>from the Local SVM Approach to this one, the results obtained from the<br>usage of MHI were quite better and more consistently accurate.</p>
+<p><img src="resources/1F9C0CCB9196C390E225FB74D38F5D0C.png =363x126" alt="svm_comp.png"></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  This paper</td>
+<td>84.1%</td>
+</tr>
+<tr>
+<td>  Bilen et al. [3]</td>
+<td>89.1%</td>
+</tr>
+<tr>
+<td>  Zha et al.</td>
+<td>89.6%</td>
+</tr>
+<tr>
+<td>  …others</td>
+<td>~88.0%</td>
+</tr>
+</tbody>
+</table>
+<p><em>Table 3</em></p>
+<h2 id="Proposals-for-improvement"><a href="#Proposals-for-improvement" class="headerlink" title="Proposals for improvement"></a>Proposals for improvement</h2><p>There are four proposals for improvement that I believe can improve the performance and success rate of predicting activities:</p>
+<ul>
+<li><p>Utilizing hidden markov models as a part of the prediction process,<br>particularly in prediction of multiple activities. This would<br>additionally require more training input.</p>
+</li>
+<li><p>Using poselets and stick figure representations as used in<br>referenced work [7].</p>
+</li>
+<li><p>Building and utilizing convolutional neural networks, similar to the<br>referenced work [3].</p>
+</li>
+<li><p>More and variegated training input videos.</p>
+</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1] Action videos. <a href="http://www.nada.kth.se/cvap/actions/" target="_blank" rel="external">http://www.nada.kth.se/cvap/actions/</a>.<br>[2] Hu moments | opencv documentation.<br><https: docs.opencv.org="" 2.4="" modules="" imgproc="" doc="" structural="" analysis="" and="" shape="" descriptors.html?highlight="cvmatchshapes#humoments">. [Online; accessed 2-December-2017].<br>[3] H. Bilen, B. Fernando, E. Gavves, A. Vedaldi, and<br>S. Gould. Dynamic image networks for action recog-<br>nition. In 2016 <em>IEEE Conference on Computer Vi-<br>sion and Pattern Recognition (CVPR)</em>, pages 3034-<br>3042, June 2016.<br>[4] A. F. Bobick. 8D-L2 activity recogni-<br>tion | CS6476 udacity lectures. <a href="https://classroom.udacity.com/courses/ud810/lessons/3513198914/concepts/34988000940923" target="_blank" rel="external">https://classroom.udacity.com/courses/ud810/lessons/3513198914/concepts/34988000940923</a>.<br>[5] A. F. Bobick and J. W. Davis. The recognition of<br>human movement using temporal templates. <em>IEEE<br>Transactions on Pattern Analysis and Machine In-<br>telligence</em>, 23(3):257-267, Mar 2001.<br>[6] Ming-Kuei Hu. Visual pattern recognition by mo-<br>ment invariants. <em>IRE Transactions on Information<br>Theory</em>, 8(2):179-187, February 1962.<br>[7] S. Maji, L. Bourdev, and J. Malik. Action recogni-<br>tion from a distributed representation of pose and<br>appearance. In <em>CVPR 2011</em>, pages 3177-3184, June<br>2011.<br>[8] C. Schuldt, I. Laptev, and B. Caputo. Recogniz-<br>ing human actions: a local svm approach. In <em>Pro-<br>ceedings of the 17th International Conference on<br>Pattern Recognition, 2004. ICPR 2004., volume 3</em>,<br>pages 32-36 Vol.3, Aug 2004.<br>[9] Wikipedia. Image moments | wikipedia, the free<br>encyclopedia. <a href="https://en.wikipedia.org/w/index.php?title=LaTeX&amp;oldid=413720397" target="_blank" rel="external">https://en.wikipedia.org/w/index.php?title=LaTeX&amp;oldid=413720397</a>, 2017. [Online; accessed 2-December-2017].</https:></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;em&gt;Activity classification by computers has a rich history and this paper seeks to describe, analyze, and compare some methods used in c
+    
+    </summary>
+    
+    
+      <category term="Activity Classification" scheme="http://ralucas.github.io/tags/Activity-Classification/"/>
+    
+      <category term="Computer Vision" scheme="http://ralucas.github.io/tags/Computer-Vision/"/>
+    
+  </entry>
   
   <entry>
     <title>Actor Model in Erlang</title>
@@ -972,106 +1093,6 @@
       <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
     
       <category term="Tough Mudder" scheme="http://ralucas.github.io/tags/Tough-Mudder/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Mt. Whitney via Mountaineer&#39;s Route</title>
-    <link href="http://ralucas.github.io/2012/10/01/Mt-Whitney-via-Mountaineer-s-Route/"/>
-    <id>http://ralucas.github.io/2012/10/01/Mt-Whitney-via-Mountaineer-s-Route/</id>
-    <published>2012-10-01T23:37:15.000Z</published>
-    <updated>2015-02-02T03:16:47.000Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1422844474/DSC00190_o01n7g.jpg" alt="Summit of Mt. Whitney"></p>
-<p>Well, here I am on the summit of Mt. Whitney on a hike done in September 2012 via the Mountaineer’s Route. Unfortunately, given the oncoming clouds, we only had a minute or two to savor the accomplishment before we had begin the descent, but what a fun adventure!</p>
-<p>So, a little backstory here: In August, I had been dating a girl that I was beginning to like, and then suddenly she stopped calling me and only after probably too many texts on my part, she finally had the courage to send me the ol’ fashioned breakup text. Woe is me, right? I had to do something, so I looked online for a guided climb of Mt. Whitney (the tallest peak in the lower 48, oh yeah!). There didn’t seem to be one going around Labor Day when I was going to have a chance to take a trip, so I shot some guiding companies some emails.</p>
-<p>I contacted SWS Mountain Guides to see if I could get on a waitlist or if they had a guided hike going on around Labor Day (check them out <a href="http://www.swsmtns.com/" target="_blank">here</a>, they also do many other guided climbs and I think I’m going to do Shasta 2013 Summer - they were great, so I do recommend them). One of the owners responded and said that they were putting a group together for around that time. Next thing I know, he calls me, I give my credit card, and I’m signed up. “Shit!,” I thought, “now I’m going to Mt. Whitney, and I’ve never climbed a mountain, and really haven’t done too much backpacking. I’m just a guy from the suburbs in Columbus, Ohio. How is this going to go?” Fortunately, I had been doing some training for an upcoming half-marathon, so I wasn’t completely out of shape. But, still only 5 weeks to get ready. I stepped up my running and started backpacking with 30 lbs at the various parks around Columbus.</p>
-<p>I started to get a sharp pain in the ball of my foot from probably over-training. I suspect either Sesamoiditis or Metatarsalgia, but the podiatrist didn’t give me a diagnosis. Had an X-ray to eliminate whether or not it was a stress fracture and would it derail my planned trip (it wasn’t). Which would have been a real bummer, as I was now looking forward to it quite a bit. The doctor made up a custom little orthotic and I ended up just taking it a little easier and the pain began to subside.  So, I was good for the trip.</p>
-<a id="more"></a>
-<h1>Lone Pine and the Portal</h1>
-
-<p>Flew out to LAX, rented a car, and drove out to Lone Pine. I stayed in the <a href="http://www.whitneyportalstore.com/" target="_blank">Whitney Portal Hostel</a> for the night (if you do go out there, it’s a nice, cheap place to stay on your way up or out). I think I was the last one in for the night. Everyone in the room kept to themselves and I struck up a short conversation with what seemed to be a drifter type character. He seemed nice, but told stories that had more of a tall tale feel. Wasn’t sure about him, so I spooned with my bag.</p>
-<p>Lone Pine is a tourist town, the main strip adorned with gift shops, restaurants, and bars. I’m not sure many people actually live in the town. I woke up early the next morning and walked across the street to the <a href="http://www.yelp.com/biz/mt-whitney-restaurant-lone-pine" target="_blank" rel="external">Mt. Whitney Restaurant</a> for breakfast.  It was  good, standard breakfast fare.</p>
-<p>I decided to do some driving around and see the area. So, I drove out to the Alabama Hills, which are right there. A lot of westerns were filmed in the area. The Alabama Hills definitely have a distinct look. They are these beautiful, reddish-brown, sandy rocks jutting out of the desert, grouped and piled up together.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1385447420/DSC00080_utm2bv.jpg" alt="Alabama Hills"></p>
-<p>The rest of the day, I spent mostly driving around and taking photographs of the scenery. I drove up to the Whitney Portal, checked it out.  Drove down, back to town.  Drove out to the main ranger station, picked up a map of the hiking routes and some post cards.  Ate lunch in town at the local coffeeshop.</p>
-<p>I drove over to the Cottonwood Lakes area, which was actually a scarier drive and I think it may have been somewhere around 10,000 feet.  That drive seemed to take a while, both up and down.  Part of my reasoning for heading up there, along with checking out the area and having nothing else to really do, was to hopefully give my body some chance to acclimate to the higher elevation, given that I have lived my entire life at about 900 feet.</p>
-<p>In the late afternoon, I finally headed up to the Whitney Portal. I had planned on camping out at the portal in order to give myself a chance to acclimate. Individual campgrounds are right there, just off the parking lot and I think they’re about $5 or $10 for the night.  There was really no one else around, so I had my pick of camping spots. So, I set up my tent and everything and took it easy for a little bit. Now, one thing I didn’t realize that I should have done (and I’m claiming ignorance here) is that your tent should be tied down to rocks.  This is due to, what I believe, the fact that the ground is mostly rocky, not hardened dirt, and it can also be quite windy at the higher altitudes.  There was a pile of rocks near the site and I looked at them somewhat bewildered, thinking that perhaps you put them on or in your tent to hold it down.  I put a few rocks in the tent and on the corners.  But, I think what you want to do is you want to tie some guy lines from your tent to the rocks to hold them down.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1422845212/DSC00087_gk7uid.jpg" alt="Whitney Portal Sign"></p>
-<p>So, anyways, I headed off to dinner at the <a href="http://www.yelp.com/biz/whitney-portal-store-lone-pine#query:portal%20restaurant" target="_blank" rel="external">Portal Store</a>. The Portal Store is right at the start of the Whitney Trail.  It’s a little shop for last minute supplies and it’s got a kitchen that serves gigantic burgers for lunch.  Although I didn’t have breakfast, I believe they also make these huge, plate-sized pancakes.   It’s a great stop after a long day of hiking or in my case of driving the twisting roads of the Sierras.  So, I had a giant burger and fries.  I tried to sit down, but was chased away by all the bees that were after my ketchup and I ended up inhaling my food in fear of an impending bee attack and got out of there.</p>
-<p>I took it easy the rest of the evening and the weather was beautiful.  I sat and read a book by a babbling brook near the campsite.  It was great.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1385447405/DSC00117_jplfky.jpg" alt="Camping at the Whitney Portal"></p>
-<!-- more -->
-<h1>Day One - To Basecamp</h1>
-
-<p>Woke up early, packed up my tent, threw everything into my rented Kia Soul and headed back down to Lone Pine to meet the group and the guides. We met outside of the local outdoor gear shop right in the center of town called <a href="http://www.sierraelevation.com/" target="_blank" rel="external">Elevation Sierra Essentials</a>. It’s owned by a fellow named John, who ended up being one of our guides, and is a truly kind, knowledgeable person.  If you end up needing any gear before a Whitney hike, this is the place to stop into.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/a_auto_left/v1422845450/DSC00220_snnsdg.jpg" alt="Mountaineer&#39;s Route Sign"></p>
-<p>We did a gear check with the guides, Tim and John, making sure we had everything we needed and if not we could just buy it next door.  The group consisted of six hikers plus two guides. There was a father and son (Gabe and Michael), two old friends (John and Joann), a single hiker (Esther), and myself. So, we repacked our stuff, found parking for our cars, and we drove up to the portal to begin hiking.</p>
-<p>We started on the Whitney trail for only a little bit until the the Mountaineer’s Route breaks off. What makes it a route and not a trail is that it isn’t explicitly marked.  You can take anyway to get there, it’s more of a guidance.</p>
-<p>So, once you break from the Whitney Trail, it almost immediately becomes more steep and some bouldering is involved.  At this point, one of the hikers, John (who I believe may have had a bad knee) decided to head back.  He was out for the trip.</p>
-<p>The hiking early on isn’t too bad, over some creeks and rocks, but as to be expected from a mountain climb, it is consistently steep.  So, one technique that you want to utilize as much as possible is the <a href="http://www.backpacker.com/september_2005_skills_rest_step/skills/12283" target="_blank" rel="external">mountaineer’s rest step</a>.  It’s essential for mountaineering.  Basically: 1) you take one step forward, allowing your back leg knee to lock, keeping the weight on the back knee; 2) you then shift your weight to the front leg and step up with the back leg, keeping weight off the stepping leg, then locking the knee of the rear leg (back to step one).  This allows you to take tiny rests as you are climbing.  It also slows you down a little bit and as things get steeper, the amount of steps taken may slow down.</p>
-<p>There was some minor bouldering and climbing over rocks, but nothing of note until you come upon the Ebersbacher Ledges.</p>
-<h3>Ebersbacher Ledges</h3>
-
-<p>The  Ebersbacher Ledges consist of a quick traverse that is exposed and then climbing of a series of a few accessible ledges until you are clear.  The difficulty with the ledges is primarily that of exposure.  It’s not serious climbing, it’s simply that a serious loss of balance would end badly.  I also think part of it is a bit of a self-fulfilling prophecy.  Everyone says they’re tricky and frightening, so they become that way.  So, they’re not difficult to climb in a technical, they’re just difficult in the face of exposure. The key, obviously, is steadiness.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1385447498/DSC00142_zbde5p.jpg" alt="Ebersbacher Ledges"></p>
-<p>One thing to note is that, you do need to know where to go up, as from some stories John was telling me, there have been hikers who have continued across the face and realized that they had passed the ledges to get up and then had gotten either stuck in a bad place or had to backtrack.</p>
-<p>So, getting the Ebersbacher Ledges, we then proceeded across the traverse one-by-one and then up the ledges.  One of the hikers got a little spooked, and I felt the same way, so one of the guides coaxed each of us across the traverse to the ledges.  It was then up the ledges, hike across a tree, and then up a few more and we were done.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1385447500/DSC00143_qpmfhm.jpg" alt="Ebersbacher Ledges"></p>
-<p>We then continued to hike up to Lower Boy Scout Lake.  Unfortunately during the hike it began raining, so on came the rain coats and pants, and with it still being quite warm, it was a bit uncomfortable.  We got to Lower Boy Scout Lake for lunch and fortunately found a bit of cover to sit and relax as it had begun raining much harder at this point.  Lower Boy Scout Lake lies at about 10,300 feet and is still mostly within the tree line.  It’s a beautiful spot to sit and relax after a morning’s vigorous hike.</p>
-<p>I downed a couple of Clif bars (which by the end of the hike I was thoroughly tired of eating. It’s sort of like Champagne, if you have too much you’re going to swear it off for good.  That’s me and the peanut butter flavored Clif bars, I just had too many that week) and off we went.  Up the mountain, over some water run offs, it can get a little slick, so footing continues to be key and a good pair of hiking poles are nice to have.  We climbed another 1,000 feet or so, to our base camp at Upper Boy Scout Lake (~11,300 feet).</p>
-<p>A tent had already been setup prior to our arrival, most likely from a previous guided climb, and staked out a great spot on the rocks.  So, we set up two more tents, dried our stuff off a bit and made a few phone calls (yes, there is cell phone reception up there, wow!?!).  Upper Boy Scout Lake is a good spot to camp on this hike, although if you do want to go further, you can make it to Iceberg Lake in time if your pace is good.</p>
-<p>John then took us out and gave us a tutorial on rope climbing and belaying basics with a group of climbers.  We came back, ate some noodles for dinner, and went to bed as the plan was to get up early (2 or 3 am) for the hike to the summit. The sky was clear that night, so I took some time to lay out on a rock and stare up at the stars.  Wonderful.</p>
-<p>To setup a tent where there is no good clay to hold stakes, the best way is to guy line the tent to heavy rocks.  It’s also quite windy on Mt. Whitney, so it’s just a good idea.  Here’s a quick tutorial on how to tie a taut line:</p>
-<p><a href="http://youtu.be/ihL5cnj5nKU" target="_blank" rel="external">http://youtu.be/ihL5cnj5nKU</a></p>
-<!-- more -->
-<h1>Day Two - Summit</h1>
-
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1385447524/DSC00160_p1kbkf.jpg" alt="Sunrise in the Sierras"></p>
-<p>We awoke at 3:30am, a little later than we wanted, tossed on our headlamps, threw on our packs, and headed up the trail to Iceberg Lake (~12,600 feet).  The night prior, we unloaded most of the unneccessary stuff from our packs for the summit hike.  I had asked Tim why it was that we didn’t need the smaller “Summit Packs” and the fact that they wanted us to carry our large packs and the reason he gave, was that the full packs are better at protecting your entire back should you fall back or hit a rock.</p>
-<p>It was relatively cold in the early morning, so we warmed up quickly.  Because of the late start, Tim, the main guide, pushed the pace a bit.  It wasn’t too bad, but some  of the folks in the group began slowing up.  The hike wasn’t too bad, with a bit of rock scrambling, but nothing overly strenuous.</p>
-<p>Not until we got to Iceberg Lake, did the climb begin to take on any real difficulty.  This was where the true climb began.  We arrived around 8am, rested and ate, before beginning the final ascent.  Joann at this point began not feeling well and decided not to join us in the climb.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1422846390/DSC00174_dv7b86.jpg" alt="Iceberg Lake"></p>
-<p>For the first part of the climb, it was heavy bouldering.  My hands and legs got a bit chewed up from the coarse rock, but nothing terrible.  Tim, Gabe, and I began to move a bit quicker than Michael and Esther at this point (John was guiding them), so Tim began pushing us at a quicker pace to attempt a summit climb as clouds were seen moving in.   After a couple of hours of scrambling, we got to a rest point called “Piss Rock,” for obvious reasons.  Took a short breather and then continued heading up.  There was very little snow on the mountain, it was mostly gravel, so footing became an issue and moving quickly was apparent.  It was definitely exhausting, maintaining such a solid pace. After what I believe was an hour or two more, we reached the “Notch.”</p>
-<p><img src="http://res.cloudinary.com/dgfchlycf/image/upload/v1422846894/DSC00185_dkjv3r.jpg" alt="View upwards from the Notch"></p>
-<p>It was here that we made the true final climb to the summit of Mt. Whitney of about 500 feet.  We again took a brief breather and had something to eat. First, you have to scramble up a brief precipice before getting to a spot where you mostly just climb up rocks.  Tim first scrambled up and got some rope into place.  Gabe and I then hooked up and scrambled up.  Not terrible, we just had to move quickly.  At this point, Tim would go on ahead, get the rope fixed for “on belay” and then we would follow.  There were a few blind rocks where we had to pull ourselves up, but nothing like rock climbing a face.  Tim was trying to getting us up there quickly as a cloud was moving in and he wanted to get us up and off the summit in order to avoid any chance of lightning strikes.</p>
-<p>Well, we made it.  We got a few minutes at the top.  I remember the feeling of elation of reaching the summit.  What a good feeling to achieve the summit. I wanted to run over to the house and sign the book, but Tim was obviously nervous at this point and wanted to get us down.  I don’t blame him as he is charged with responsibility for us, “the clients.”  So, down we went.  Unfortunately, Esther and Michael didn’t get the chance to go for the summit as Tim called them off given the oncoming clouds.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1422846880/DSC00191_rgah2s.jpg" alt="View from the Summit of Mt. Whitney"></p>
-<p>I actually found the climb down from this point to be more difficult than the climb up as getting my footing was at times blind and uncertain.  And as they say “49% is getting to the top.”  At the scramble part, as I was trying to slowly ease myself down, I fell.  Fortunately, I was on rope, so Tim caught me.  It could have been quite ugly.  Thank you, Tim.</p>
-<p>From the Notch down, it wasn’t too bad.  Footing really was the issue as we began the descent as the rock is quite loose in this section.  Another few more hours and we were back at Iceberg Lake, with the most difficult portion of the climb past us. We took a nice break.  At this point it was the afternoon, so we started out to Upper Boy Scout Lake to get back for dinner and rest.  At this point, I began dragging a bit and not hiking as quickly.  Nearer to Upper Boy Scout Lake there is a large amount of quartz rock.</p>
-<!-- more -->
-<h1>Day Three - Back to Lone Pine</h1>
-
-<p>We woke up early to a beautiful sunrise over the Sierras, ate a nice hot breakfast of oatmeal, and headed down.  We didn’t have to pack up the tents as a group was heading up that day to utilize them, which was a nice bonus.  The hike down wasn’t too bad, I was just a bit worn out from the previous day, so my technique at times got bad, allowing my front knee to lock up.  Not a good idea and an easy way to injure oneself especially with a 30-40 pound pack.  The day was great and as we descended, it got progressively warmer.</p>
-<p>Down at the Ebersbacher Ledges, I had a bit of moment of freak-out and began to get nervous, got myself a little stuck and uncomfortable on them.  Made it through them, though, with some coaxing from John (thank god for John).</p>
-<p>Unfortunately, I think my boots may have been too small and didn’t leave enough toe room, so I got a serious case of toe bang and lost a few toe nails to it.  I really should have been wearing about a half size larger to give my toes so more room.  Lesson learned.</p>
-<p>Well, we got down to Portal, took a few photos and headed back to Lone Pine.  We all ate a celebratory lunch at the Mt. Whitney Restaurant, enjoying a nice big burger and beer.</p>
-<p>I was so worn out that I decided to stay the night in Lone Pine before heading to the coast for some surfing and relaxing on the beach.</p>
-<!-- more -->
-<h1>Further Reading on Mt. Whitney</h1>
-
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1422845749/DSC00224_cgvirj.jpg" alt="Group that went on the hike"></p>
-<p>Here’s a link also to another great blog regarding hiking the Mountaineer’s Route of Mt. Whitney that I found helpful before I went: <a href="http://www.sierradescents.com/climbing/whitney/mountaineers-route.html" target="_blank">http://www.sierradescents.com/climbing/whitney/mountaineers-route.html</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1422844474/DSC00190_o01n7g.jpg&quot; alt=&quot;Summit of Mt. Whitney&quot;&gt;&lt;/p&gt;
-&lt;p&gt;Well, here I am on the summit of Mt. Whitney on a hike done in September 2012 via the Mountaineer’s Route. Unfortunately, given the oncoming clouds, we only had a minute or two to savor the accomplishment before we had begin the descent, but what a fun adventure!&lt;/p&gt;
-&lt;p&gt;So, a little backstory here: In August, I had been dating a girl that I was beginning to like, and then suddenly she stopped calling me and only after probably too many texts on my part, she finally had the courage to send me the ol’ fashioned breakup text. Woe is me, right? I had to do something, so I looked online for a guided climb of Mt. Whitney (the tallest peak in the lower 48, oh yeah!). There didn’t seem to be one going around Labor Day when I was going to have a chance to take a trip, so I shot some guiding companies some emails.&lt;/p&gt;
-&lt;p&gt;I contacted SWS Mountain Guides to see if I could get on a waitlist or if they had a guided hike going on around Labor Day (check them out &lt;a href=&quot;http://www.swsmtns.com/&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;, they also do many other guided climbs and I think I’m going to do Shasta 2013 Summer - they were great, so I do recommend them). One of the owners responded and said that they were putting a group together for around that time. Next thing I know, he calls me, I give my credit card, and I’m signed up. “Shit!,” I thought, “now I’m going to Mt. Whitney, and I’ve never climbed a mountain, and really haven’t done too much backpacking. I’m just a guy from the suburbs in Columbus, Ohio. How is this going to go?” Fortunately, I had been doing some training for an upcoming half-marathon, so I wasn’t completely out of shape. But, still only 5 weeks to get ready. I stepped up my running and started backpacking with 30 lbs at the various parks around Columbus.&lt;/p&gt;
-&lt;p&gt;I started to get a sharp pain in the ball of my foot from probably over-training. I suspect either Sesamoiditis or Metatarsalgia, but the podiatrist didn’t give me a diagnosis. Had an X-ray to eliminate whether or not it was a stress fracture and would it derail my planned trip (it wasn’t). Which would have been a real bummer, as I was now looking forward to it quite a bit. The doctor made up a custom little orthotic and I ended up just taking it a little easier and the pain began to subside.  So, I was good for the trip.&lt;/p&gt;
-    
-    </summary>
-    
-    
-      <category term="Mt. Whitney" scheme="http://ralucas.github.io/tags/Mt-Whitney/"/>
-    
-      <category term="Mountaineer&#39;s Route" scheme="http://ralucas.github.io/tags/Mountaineer-s-Route/"/>
-    
-      <category term="Mountaineering" scheme="http://ralucas.github.io/tags/Mountaineering/"/>
-    
-      <category term="Climbing" scheme="http://ralucas.github.io/tags/Climbing/"/>
     
   </entry>
   

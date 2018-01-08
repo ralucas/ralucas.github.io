@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Node.js and more...">
+    <meta name="keyword"  content="Node.js, JavaScript, Networking, TCP, Code, Running, HTTP">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Activity Classification using MHI Techniques - Richard Lucas&#39; Blog
+        
+    </title>
+
+    <link rel="canonical" href="http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Richard Lucas&#39; Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="http://ralucas.github.io/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/orion-nebula.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/Activity-Classification/" title="Activity Classification">Activity Classification</a>
+                        
+                          <a class="tag" href="/tags/Computer-Vision/" title="Computer Vision">Computer Vision</a>
+                        
+
+                    </div>
+                    <h1>Activity Classification using MHI Techniques</h1>
+                    
+                    <span class="meta">
+                        Posted by Richard Lucas on
+                        Dec 3 2017
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p><em>Activity classification by computers has a rich history and this paper seeks to describe, analyze, and compare some methods used in classifying a subset of actions. The creation of temporal templates via motion-energy images (MEI) and motion history images (MHI) were utilized to analyze and quantify frames of videos. Image moments were taken from the MHIs and a learning model was built. The results obtained are compared and discussed along with other comparative methods. The activities focused on were boxing, handclapping, handwaving, running, jogging, and walking.</em></p>
+<h2 id="Interesting-Links"><a href="#Interesting-Links" class="headerlink" title="Interesting Links"></a>Interesting Links</h2><ul>
+<li><p><strong>Multiple Activity Videos:</strong></p>
+<ul>
+<li><p>Handclapping &amp; Boxing Video <a href="https://youtu.be/dEtfgAYwCg4" target="_blank" rel="external">https://youtu.be/dEtfgAYwCg4</a></p>
+</li>
+<li><p>Multitude activity Video <a href="https://youtu.be/x_hFKZzc0jw" target="_blank" rel="external">https://youtu.be/x_hFKZzc0jw</a></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Related-work-in-recently-published-research"><a href="#Related-work-in-recently-published-research" class="headerlink" title="Related work in recently published research"></a>Related work in recently published research</h2><p>There are a number of research publications that are directly related to activity classification, although some of their methods may vary. The most pertinent related work to this project is that of Bobick and Davis [link][5], in which the idea of using temporal templates to classify activities is discussed. This technique relies primarily on the creation of Motion-energy images and Motion-history images to create a temporal template. Image moments are then extracted from these templates and a distance model is created.</p>
+<p>An alternative to temporal templates is suggested in Schuldt, et al [8] in which the use of space-time features are used with a support vector machine classifier. The space-time features are, in essence, points of interest that occur at specific points over time allowing patterns to be developed. They are constructed through the use of image gradients and a Gaussian convolution kernel in which points of interest are located in comparison to a maxima. The use of SVMs in training a model are then taken to achieve fairly good results (and will be compared later herein).</p>
+<p>In more recent work, the use of still poses and poselets (body part detection from joint and part positions) [7] to develop an underlying stick figure representation found good results in identifying activities. Additionally, this research took into account the 3D orientation from a trained model. The method achieved results of ~60%<br>correct identification with just the poselet representation and ~65% when the object model was added. Another recent study [3] utilized summary dynamic rgb images and convolution neural network (CNN) to develop a system in which identification was done quickly and reasonably successfully as the researchers were able to get ~89% successful identification.</p>
+<h2 id="Methodology-and-implementation-used"><a href="#Methodology-and-implementation-used" class="headerlink" title="Methodology and implementation used"></a>Methodology and implementation used</h2><p>Temporal templates were used to create modeled images over a period of time, traditional image moments [9][4][6][2] were then taken and a model was trained.</p>
+<h3 id="Temporal-Templates"><a href="#Temporal-Templates" class="headerlink" title="Temporal Templates"></a>Temporal Templates</h3><p>Two types of temporal templates were created: motion-energy images (or binary images) (MEIs) and motion-history images (MHIs). In creating these images, each video frame was taken through a preprocessing step in order to better extract the purposeful, activity related motion from the<br>background and tangential motions within each frame. This was done b first grayscaling each frame, then running the frame through OpenCV Gaussian blurring and morphing functions.</p>
+<p>The MEIs were created by taking a temporal diff from each frame and assigning coordinates with a 0 or 1 given if the temporal difference was greater than a constant $\theta$ or not (see examples in figure 1). A $\theta$ of $14$ was used throughout the training and testing phases as it was determined to give the best results.</p>
+<p><img src="resources/A19C0C2A9DEED833992394DAB24C3EE7.png =160x120" alt="mei_image_boxing_person05_d3_10.png"> <img src="resources/ADC2C3C9010B694FB9C870F47C89C5EF.png =160x120" alt="mei_image_handwaving_person01_d3_12.png"></p>
+<p><img src="resources/206EF4CD0F290B8C44E39F800AAF6826.png =160x120" alt="mei_image_walking_person04_d3_20.png"> <img src="resources/889A6EB6627389DACAA15AFCB8DDBE01.png =160x120" alt="mei_image_handclapping_person05_d3_4.png"></p>
+<p><img src="resources/58CCB63298A0D0C74797DC0B6133BE59.png =160x120" alt="mei_image_jogging_person04_d3_0.png"> <img src="resources/646C7B58F989519A1C2838B9718699DF.png =160x120" alt="mei_image_running_person05_d3_2.png"><br><strong>Figure 1</strong>: <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em></p>
+<p>The MHIs were built from those binary images and provide a more nuanced and graded view of the motion over time. These were calculated utilizing hand-crafted constants $\tau$, in which over time gradients were developed. Figure 2 shows an example of different people handwaving as it shows more of the change over time versus the constant that the MEIs show.</p>
+<p>In creation of these temporal templates, the $\tau$ constant value for each activity was additionally used (Table 1) a demarcation for how many frames to analyze from a video, so the video sequences (as outlined in the sequences[1]) were divided further into small $\tau$ based<br>chunks. This allowed for consistent training of an activity and expanding the total number of training samples, therefore giving more to the trained model to improve upon prediction.</p>
+<p>  | ————– | – |<br>  | boxing         | 7  |<br>  | handclapping   | 13 |<br>  | handwaving     | 17 |<br>  | jogging        | 21 |<br>  | running        | 11 |<br>  | walking        | 35 |<br><em>Table 1</em></p>
+<p><img src="resources/31DF5A4229040E941925BCAA6766B5A9.png =160x120" alt="mhi_image_boxing_person04_d3_3.png"> <img src="resources/A5627A0DA267394D6B3BE27EC2A0AB91.png =160x120" alt="mhi_image_handwaving_person05_d3_30.png"></p>
+<p><img src="resources/5DAB00468AFD541B0A7E0165381C3E02.png =160x120" alt="mhi_image_walking_person05_d3_7.png"> <img src="resources/F1E8F01CB2227A18975836934E58F422.png =160x120" alt="mhi_image_handclapping_person03_d3_6.png"></p>
+<p><img src="resources/E56FAD24DF1E1D637212375E26C0A87D.png =160x120" alt="mhi_image_jogging_person02_d3_7.png"> <img src="resources/70539DBC7EF87041DC08B733DFDD0242.png =160x120" alt="mhi_image_running_person05_d3_10.png"></p>
+<p><strong>Figure 2:</strong> <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em> </p>
+<h3 id="Image-Moments"><a href="#Image-Moments" class="headerlink" title="Image Moments"></a>Image Moments</h3><p>Image moments for each MHI were taken to develop a feature set upon<br>which the temporal templates could be compared. The central ($\mu$) and<br>scale invariant ($\nu$) moments were calculated for the following<br>moments $pq \in {20, 11, 02, 30, 21, 12, 03, 22}$ [4]. The 7<br>main Hu Moments [6][2] were then calculated from the scale<br>invariant moments. However, after much testing and training, it was<br>determined that the scale invariant moments gave the best results.</p>
+<h3 id="Training-and-Prediction"><a href="#Training-and-Prediction" class="headerlink" title="Training and Prediction"></a>Training and Prediction</h3><p>A large dataset of videos [1] was used as input for training. The<br>K-nearest neighbor algorithm was used to train, classify, and predict<br>the videos. The K-nearest neighbor algorithm works by classifying input<br>based on a plurality vote of nearest neighbors. The features used for<br>training and prediction for this dataset was found to be a combination<br>of the scale invariant features ($\nu$) and the Hu moments. The primary<br>factor here was, in using the Hu moments as features, that enough<br>differentiation was not provided and there was an increase in false<br>positives when testing.</p>
+<h2 id="Results-and-performance-statistics"><a href="#Results-and-performance-statistics" class="headerlink" title="Results and performance statistics"></a>Results and performance statistics</h2><p><em>Figure 3: Training results | 90.8% accuracy</em><br><img src="resources/5EC509D8F11D712DBCE8FF4606A860E2.png =460x345" alt="training.png"></p>
+<p><em>Figure 4: Test results | 84.1% accuracy</em><br><img src="resources/64911BF7A62AE57DF347A9A11D123452.png =460x345" alt="test.png"></p>
+<p>Figures 3 and 4 give a confusion matrix on the overall results from<br>training and testing.</p>
+<h3 id="Experiment"><a href="#Experiment" class="headerlink" title="Experiment"></a>Experiment</h3><p>In addition to the single activity videos used to train and test<br>against, videos with multiple activities within the same video were run<br>as an experiment (sample frames in Figure 6). The method used for each<br>multiple activity video did the following:</p>
+<p><em>Labels = Dictionary of labels $\rightarrow$ $\tau$ values</em> initialize<br><span>$Frame_List=1 + max(\tau)$</span></p>
+<p>As outlined in Algorithm [dmap], multiple activity prediction, first<br>gets an initial prediction by building an array of frames. Then as that<br>frame list is iterated over and $mei$ and $mhi$ images are built, when<br>the number of frames is equal to a $\tau$ value, a prediction from the<br>predict engine is created based on the current $mhi$ values and that<br>prediction is compared to the current $\tau$ label. If they are equal,<br>then that label is returned and a $\tau$ number of frames is written and<br>classified with that label.</p>
+<h2 id="Analysis-of-results"><a href="#Analysis-of-results" class="headerlink" title="Analysis of results"></a>Analysis of results</h2><p>The six activities could be further categorized into two primary groups:<br>stationary activities and moving activities. Given this, focus can be<br>placed on results within these categories. The most glaring issue is<br>that of the <em>handclapping</em> results. The trainer most commonly confused<br>it with <em>handwaving</em> and <em>boxing</em>, which does have similar motions.</p>
+<p>The moving activities also were difficult to separate, and particularly<br><em>running</em> and <em>jogging</em> proved to be quite difficult to distinguish<br>between. However, given reasonably differentiated $\tau$ values, the<br>variation was carried through. It could also be argued that the<br>difference between jogging and running may be quite different from<br>person to person, so I still believe that these two classifications are<br>somewhat interchangeable.</p>
+<h3 id="Analysis-of-experiment"><a href="#Analysis-of-experiment" class="headerlink" title="Analysis of experiment"></a>Analysis of experiment</h3><p>As shown in Table 2, the performance times of algorithm used<br>in the experiment was fairly slow. It took close to half a second to<br>complete a full run of the algorithm of frame set analysis and write,<br>which entails running the algorithm (see above) and write the newly<br>labeled frames to video.</p>
+<p>  ————————————- | ——–<br>  Frames (36) analysis and prediction   |   0.45s<br>  Moments calculation:                  |  0.013s<br>  Temporal image creation               |   0.15s</p>
+<p><em>Table 2</em></p>
+<p>The accuracy of the multiple activity videos was hit-or-miss. For<br>example, in the video of just <em>handclapping</em> and <em>boxing</em>, the accuracy<br>was outstanding, showing an above 90% accuracy (see Figure 5). However,<br>in the multitude activity video, accuracy declined. Some of this was due<br>to the definition of <em>jogging</em> versus <em>running</em>, but there were also<br>misclassifications (see Figure 6). Throughout the multiple activity<br>videos, there were misclassifications (see Figure 11), mostly among<br>their two major groups (as discussed above), i.e. <em>walking</em> getting<br>classified as <em>jogging</em>, <em>boxing</em> as <em>handclapping</em>, etc.</p>
+<p><em>Figure 5: Handclapping and Boxing | 90.7% accuracy</em><br><img src="resources/4E165FF834E416F58336EF37445CE402.png =460x345" alt="handclapping_boxing_matrix.png"><br><em>N.B. $nan$ means that label was not expected</em></p>
+<p><em>Figure 6: Multitude | 36.4% accuracy</em><br><img src="resources/2F9E7EA10E826520B4DB2FED7F3AEDAB.png =460x345" alt="multitude_matrix.png"><br><em>N.B. $nan$ means that label was not expected</em></p>
+<p><img src="resources/095BFCDDB5ACD1A9E10E6C8440C2341E.png =284x160" alt="experiment_1_160.png"> <img src="resources/5EC4CE79902E1C304DCE17A1B94331B7.png =284x160" alt="experiment_3_1232.png"></p>
+<p><img src="resources/89A45B61265B78D82C15B9CCBC5BD161.png =284x160" alt="experiment_2_1096.png"> <img src="resources/F101A2C26F3D379CA8E578F7C3D761C4.png =284x160" alt="experiment_2_524.png"></p>
+<p><img src="resources/A715ADD3B15BCD043840813FC32E721F.png =284x160" alt="experiment_3_468.png"> <img src="resources/FB3BA8C32C0C1DFFB7DD20B769DA7645.png =284x160" alt="experiment_1_1076.png"></p>
+<p><strong>Figure 7:</strong> <em>Clockwise, starting in left corner: Boxing (correctly identified), Handwaving (incorrectly identified as clapping), Boxing (incorrectly identified as waving), Running (incorrectly identified as jogging), Walking (incorrectly identified as jogging), Handwaving (correctly identified</em></p>
+<h3 id="Analysis-of-weaknesses"><a href="#Analysis-of-weaknesses" class="headerlink" title="Analysis of weaknesses"></a>Analysis of weaknesses</h3><p>There were some weaknesses that came to light in running these<br>predictions:</p>
+<ul>
+<li><p>Currently the method requires differing $\tau$ values or if they are<br>similar, quite different $mhi$ images.</p>
+</li>
+<li><p>All the $\tau$ values were carefully set and vetted. Simply not a<br>scalable process.</p>
+</li>
+<li><p>As the discussed above, the performance speed is quite slow.</p>
+</li>
+<li><p>Still a fairly custom and brittle development process.</p>
+</li>
+</ul>
+<h2 id="Comparison-to-the-state-of-the-art-methods"><a href="#Comparison-to-the-state-of-the-art-methods" class="headerlink" title="Comparison to the state-of-the-art methods"></a>Comparison to the state-of-the-art methods</h2><p>In comparison of the methodology used to the state-of-the-art methods,<br>we can look at the results obtained from usage of an identical dataset<br>from the Schuldt, et al [8]. In comparing the confusion matrices<br>from the Local SVM Approach to this one, the results obtained from the<br>usage of MHI were quite better and more consistently accurate.</p>
+<p><img src="resources/1F9C0CCB9196C390E225FB74D38F5D0C.png =363x126" alt="svm_comp.png"></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>  This paper</td>
+<td>84.1%</td>
+</tr>
+<tr>
+<td>  Bilen et al. [3]</td>
+<td>89.1%</td>
+</tr>
+<tr>
+<td>  Zha et al.</td>
+<td>89.6%</td>
+</tr>
+<tr>
+<td>  …others</td>
+<td>~88.0%</td>
+</tr>
+</tbody>
+</table>
+<p><em>Table 3</em></p>
+<h2 id="Proposals-for-improvement"><a href="#Proposals-for-improvement" class="headerlink" title="Proposals for improvement"></a>Proposals for improvement</h2><p>There are four proposals for improvement that I believe can improve the performance and success rate of predicting activities:</p>
+<ul>
+<li><p>Utilizing hidden markov models as a part of the prediction process,<br>particularly in prediction of multiple activities. This would<br>additionally require more training input.</p>
+</li>
+<li><p>Using poselets and stick figure representations as used in<br>referenced work [7].</p>
+</li>
+<li><p>Building and utilizing convolutional neural networks, similar to the<br>referenced work [3].</p>
+</li>
+<li><p>More and variegated training input videos.</p>
+</li>
+</ul>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1] Action videos. <a href="http://www.nada.kth.se/cvap/actions/" target="_blank" rel="external">http://www.nada.kth.se/cvap/actions/</a>.<br>[2] Hu moments | opencv documentation.<br><https: docs.opencv.org="" 2.4="" modules="" imgproc="" doc="" structural="" analysis="" and="" shape="" descriptors.html?highlight="cvmatchshapes#humoments">. [Online; accessed 2-December-2017].<br>[3] H. Bilen, B. Fernando, E. Gavves, A. Vedaldi, and<br>S. Gould. Dynamic image networks for action recog-<br>nition. In 2016 <em>IEEE Conference on Computer Vi-<br>sion and Pattern Recognition (CVPR)</em>, pages 3034-<br>3042, June 2016.<br>[4] A. F. Bobick. 8D-L2 activity recogni-<br>tion | CS6476 udacity lectures. <a href="https://classroom.udacity.com/courses/ud810/lessons/3513198914/concepts/34988000940923" target="_blank" rel="external">https://classroom.udacity.com/courses/ud810/lessons/3513198914/concepts/34988000940923</a>.<br>[5] A. F. Bobick and J. W. Davis. The recognition of<br>human movement using temporal templates. <em>IEEE<br>Transactions on Pattern Analysis and Machine In-<br>telligence</em>, 23(3):257-267, Mar 2001.<br>[6] Ming-Kuei Hu. Visual pattern recognition by mo-<br>ment invariants. <em>IRE Transactions on Information<br>Theory</em>, 8(2):179-187, February 1962.<br>[7] S. Maji, L. Bourdev, and J. Malik. Action recogni-<br>tion from a distributed representation of pose and<br>appearance. In <em>CVPR 2011</em>, pages 3177-3184, June<br>2011.<br>[8] C. Schuldt, I. Laptev, and B. Caputo. Recogniz-<br>ing human actions: a local svm approach. In <em>Pro-<br>ceedings of the 17th International Conference on<br>Pattern Recognition, 2004. ICPR 2004., volume 3</em>,<br>pages 32-36 Vol.3, Aug 2004.<br>[9] Wikipedia. Image moments | wikipedia, the free<br>encyclopedia. <a href="https://en.wikipedia.org/w/index.php?title=LaTeX&amp;oldid=413720397" target="_blank" rel="external">https://en.wikipedia.org/w/index.php?title=LaTeX&amp;oldid=413720397</a>, 2017. [Online; accessed 2-December-2017].</https:></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/01/09/Actor-Model-in-Erlang/" data-toggle="tooltip" data-placement="top" title="Actor Model in Erlang">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+<section id="comments" class="container">
+  <div id="disqus_thread"></div>
+<section>
+
+<!-- disqus start -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "ralucas";
+    var disqus_identifier = "http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/";
+    var disqus_url = "http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<!-- disqu(s end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/r_a_lucas">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="mailto:richard@richardalucas.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/ralucas">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Richard Lucas&#39; Blog 2018 
+                    <br>
+                    Contact at <a href="mailto:richard@richardalucas.com">richard@richardalucas.com</a> 
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://ralucas.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-50082017-4';
+    var _gaDomain = 'blog.richardalucas.com';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="http://ralucas.github.io/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
