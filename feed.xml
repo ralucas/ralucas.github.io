@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2018-01-08T02:32:37.826Z</updated>
+  <updated>2018-01-08T02:36:31.458Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/"/>
     <id>http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/</id>
     <published>2017-12-03T07:00:00.000Z</published>
-    <updated>2018-01-08T02:32:37.826Z</updated>
+    <updated>2018-01-08T02:36:31.458Z</updated>
     
     <content type="html"><![CDATA[<p><em>Activity classification by computers has a rich history and this paper seeks to describe, analyze, and compare some methods used in classifying a subset of actions. The creation of temporal templates via motion-energy images (MEI) and motion history images (MHI) were utilized to analyze and quantify frames of videos. Image moments were taken from the MHIs and a learning model was built. The results obtained are compared and discussed along with other comparative methods. The activities focused on were boxing, handclapping, handwaving, running, jogging, and walking.</em></p>
 <h2 id="Interesting-Links"><a href="#Interesting-Links" class="headerlink" title="Interesting Links"></a>Interesting Links</h2><ul>
@@ -81,7 +81,7 @@
 <p><strong>Figure 2:</strong> <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em> </p>
 <h3 id="Image-Moments"><a href="#Image-Moments" class="headerlink" title="Image Moments"></a>Image Moments</h3><p>Image moments for each MHI were taken to develop a feature set upon which the temporal templates could be compared. The central ($\mu$) and scale invariant ($\nu$) moments were calculated for the following moments $pq \in {20, 11, 02, 30, 21, 12, 03, 22}$ [4]. The 7 main Hu Moments [6][2] were then calculated from the scale invariant moments. However, after much testing and training, it was determined that the scale invariant moments gave the best results.</p>
 <h3 id="Training-and-Prediction"><a href="#Training-and-Prediction" class="headerlink" title="Training and Prediction"></a>Training and Prediction</h3><p>A large dataset of videos [1] was used as input for training. The K-nearest neighbor algorithm was used to train, classify, and predict the videos. The K-nearest neighbor algorithm works by classifying input based on a plurality vote of nearest neighbors. The features used for training and prediction for this dataset was found to be a combination of the scale invariant features ($\nu$) and the Hu moments. The primary factor here was, in using the Hu moments as features, that enough differentiation was not provided and there was an increase in false positives when testing.</p>
-<h2 id="Results-and-performance-statistics"><a href="#Results-and-performance-statistics" class="headerlink" title="Results and performance statistics"></a>Results and performance statistics</h2><p><em>Figure 3: Training results | 90.8% accuracy</em><br><img width="460" height="345" src="/resources/5EC509D8F11D712DBCE8FF4606A860E22.png" alt="training.png"></p>
+<h2 id="Results-and-performance-statistics"><a href="#Results-and-performance-statistics" class="headerlink" title="Results and performance statistics"></a>Results and performance statistics</h2><p><em>Figure 3: Training results | 90.8% accuracy</em><br><img width="460" height="345" src="/resources/5EC509D8F11D712DBCE8FF4606A860E2.png" alt="training.png"></p>
 <p><em>Figure 4: Test results | 84.1% accuracy</em><br><img width="460" height="345" src="/resources/64911BF7A62AE57DF347A9A11D123452.png" alt="test.png"></p>
 <p>Figures 3 and 4 give a confusion matrix on the overall results from training and testing.</p>
 <h3 id="Experiment"><a href="#Experiment" class="headerlink" title="Experiment"></a>Experiment</h3><p>In addition to the single activity videos used to train and test against, videos with multiple activities within the same video were run as an experiment (sample frames in Figure 6). The method used for each multiple activity video did the following:</p>
@@ -888,9 +888,9 @@
     </summary>
     
     
-      <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
-    
       <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
+    
+      <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
     
   </entry>
   
