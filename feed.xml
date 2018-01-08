@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2018-01-08T01:41:51.825Z</updated>
+  <updated>2018-01-08T01:45:23.723Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/"/>
     <id>http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/</id>
     <published>2017-12-03T07:00:00.000Z</published>
-    <updated>2018-01-08T01:41:51.825Z</updated>
+    <updated>2018-01-08T01:45:23.723Z</updated>
     
     <content type="html"><![CDATA[<p><em>Activity classification by computers has a rich history and this paper seeks to describe, analyze, and compare some methods used in classifying a subset of actions. The creation of temporal templates via motion-energy images (MEI) and motion history images (MHI) were utilized to analyze and quantify frames of videos. Image moments were taken from the MHIs and a learning model was built. The results obtained are compared and discussed along with other comparative methods. The activities focused on were boxing, handclapping, handwaving, running, jogging, and walking.</em></p>
 <h2 id="Interesting-Links"><a href="#Interesting-Links" class="headerlink" title="Interesting Links"></a>Interesting Links</h2><ul>
@@ -30,15 +30,15 @@
 </ul>
 </li>
 </ul>
-<h2 id="Related-work-in-recently-published-research"><a href="#Related-work-in-recently-published-research" class="headerlink" title="Related work in recently published research"></a>Related work in recently published research</h2><p>There are a number of research publications that are directly related to activity classification, although some of their methods may vary. The most pertinent related work to this project is that of Bobick and Davis [link][5], in which the idea of using temporal templates to classify activities is discussed. This technique relies primarily on the creation of Motion-energy images and Motion-history images to create a temporal template. Image moments are then extracted from these templates and a distance model is created.</p>
+<h2 id="Related-work-in-recently-published-research"><a href="#Related-work-in-recently-published-research" class="headerlink" title="Related work in recently published research"></a>Related work in recently published research</h2><p>There are a number of research publications that are directly related to activity classification, although some of their methods may vary. The most pertinent related work to this project is that of Bobick and Davis [5], in which the idea of using temporal templates to classify activities is discussed. This technique relies primarily on the creation of Motion-energy images and Motion-history images to create a temporal template. Image moments are then extracted from these templates and a distance model is created.</p>
 <p>An alternative to temporal templates is suggested in Schuldt, et al [8] in which the use of space-time features are used with a support vector machine classifier. The space-time features are, in essence, points of interest that occur at specific points over time allowing patterns to be developed. They are constructed through the use of image gradients and a Gaussian convolution kernel in which points of interest are located in comparison to a maxima. The use of SVMs in training a model are then taken to achieve fairly good results (and will be compared later herein).</p>
 <p>In more recent work, the use of still poses and poselets (body part detection from joint and part positions) [7] to develop an underlying stick figure representation found good results in identifying activities. Additionally, this research took into account the 3D orientation from a trained model. The method achieved results of ~60% correct identification with just the poselet representation and ~65% when the object model was added. Another recent study [3] utilized summary dynamic rgb images and convolution neural network (CNN) to develop a system in which identification was done quickly and reasonably successfully as the researchers were able to get ~89% successful identification.</p>
 <h2 id="Methodology-and-implementation-used"><a href="#Methodology-and-implementation-used" class="headerlink" title="Methodology and implementation used"></a>Methodology and implementation used</h2><p>Temporal templates were used to create modeled images over a period of time, traditional image moments [9][4][6][2] were then taken and a model was trained.</p>
 <h3 id="Temporal-Templates"><a href="#Temporal-Templates" class="headerlink" title="Temporal Templates"></a>Temporal Templates</h3><p>Two types of temporal templates were created: motion-energy images (or binary images) (MEIs) and motion-history images (MHIs). In creating these images, each video frame was taken through a preprocessing step in order to better extract the purposeful, activity related motion from the background and tangential motions within each frame. This was done b first grayscaling each frame, then running the frame through OpenCV Gaussian blurring and morphing functions.</p>
 <p>The MEIs were created by taking a temporal diff from each frame and assigning coordinates with a 0 or 1 given if the temporal difference was greater than a constant $\theta$ or not (see examples in figure 1). A $\theta$ of $14$ was used throughout the training and testing phases as it was determined to give the best results.</p>
-<p><img src="resources/A19C0C2A9DEED833992394DAB24C3EE7.png =160x120" alt="mei_image_boxing_person05_d3_10.png"> <img src="resources/ADC2C3C9010B694FB9C870F47C89C5EF.png =160x120" alt="mei_image_handwaving_person01_d3_12.png"></p>
-<p><img src="resources/206EF4CD0F290B8C44E39F800AAF6826.png =160x120" alt="mei_image_walking_person04_d3_20.png"> <img src="resources/889A6EB6627389DACAA15AFCB8DDBE01.png =160x120" alt="mei_image_handclapping_person05_d3_4.png"></p>
-<p><img src="resources/58CCB63298A0D0C74797DC0B6133BE59.png =160x120" alt="mei_image_jogging_person04_d3_0.png"> <img src="resources/646C7B58F989519A1C2838B9718699DF.png =160x120" alt="mei_image_running_person05_d3_2.png"><br><strong>Figure 1</strong>: <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em></p>
+<p><img src="/resources/A19C0C2A9DEED833992394DAB24C3EE7.png =160x120" alt="mei_image_boxing_person05_d3_10.png"> <img src="resources/ADC2C3C9010B694FB9C870F47C89C5EF.png =160x120" alt="mei_image_handwaving_person01_d3_12.png"></p>
+<p><img src="/resources/206EF4CD0F290B8C44E39F800AAF6826.png =160x120" alt="mei_image_walking_person04_d3_20.png"> <img src="resources/889A6EB6627389DACAA15AFCB8DDBE01.png =160x120" alt="mei_image_handclapping_person05_d3_4.png"></p>
+<p><img src="/resources/58CCB63298A0D0C74797DC0B6133BE59.png =160x120" alt="mei_image_jogging_person04_d3_0.png"> <img src="resources/646C7B58F989519A1C2838B9718699DF.png =160x120" alt="mei_image_running_person05_d3_2.png"><br><strong>Figure 1</strong>: <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em></p>
 <p>The MHIs were built from those binary images and provide a more nuanced and graded view of the motion over time. These were calculated utilizing hand-crafted constants $\tau$, in which over time gradients were developed. Figure 2 shows an example of different people handwaving as it shows more of the change over time versus the constant that the MEIs show.</p>
 <p>In creation of these temporal templates, the $\tau$ constant value for each activity was additionally used (Table 1) a demarcation for how many frames to analyze from a video, so the video sequences (as outlined in the sequences[1]) were divided further into small $\tau$ based chunks. This allowed for consistent training of an activity and expanding the total number of training samples, therefore giving more to the trained model to improve upon prediction.</p>
 <table>
@@ -76,14 +76,14 @@
 </tbody>
 </table>
 <p><em>Table 1</em></p>
-<p><img src="resources/31DF5A4229040E941925BCAA6766B5A9.png =160x120" alt="mhi_image_boxing_person04_d3_3.png"> <img src="resources/A5627A0DA267394D6B3BE27EC2A0AB91.png =160x120" alt="mhi_image_handwaving_person05_d3_30.png"></p>
-<p><img src="resources/5DAB00468AFD541B0A7E0165381C3E02.png =160x120" alt="mhi_image_walking_person05_d3_7.png"> <img src="resources/F1E8F01CB2227A18975836934E58F422.png =160x120" alt="mhi_image_handclapping_person03_d3_6.png"></p>
-<p><img src="resources/E56FAD24DF1E1D637212375E26C0A87D.png =160x120" alt="mhi_image_jogging_person02_d3_7.png"> <img src="resources/70539DBC7EF87041DC08B733DFDD0242.png =160x120" alt="mhi_image_running_person05_d3_10.png"></p>
+<p><img src="/resources/31DF5A4229040E941925BCAA6766B5A9.png =160x120" alt="mhi_image_boxing_person04_d3_3.png"> <img src="resources/A5627A0DA267394D6B3BE27EC2A0AB91.png =160x120" alt="mhi_image_handwaving_person05_d3_30.png"></p>
+<p><img src="/resources/5DAB00468AFD541B0A7E0165381C3E02.png =160x120" alt="mhi_image_walking_person05_d3_7.png"> <img src="resources/F1E8F01CB2227A18975836934E58F422.png =160x120" alt="mhi_image_handclapping_person03_d3_6.png"></p>
+<p><img src="/resources/E56FAD24DF1E1D637212375E26C0A87D.png =160x120" alt="mhi_image_jogging_person02_d3_7.png"> <img src="resources/70539DBC7EF87041DC08B733DFDD0242.png =160x120" alt="mhi_image_running_person05_d3_10.png"></p>
 <p><strong>Figure 2:</strong> <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em> </p>
 <h3 id="Image-Moments"><a href="#Image-Moments" class="headerlink" title="Image Moments"></a>Image Moments</h3><p>Image moments for each MHI were taken to develop a feature set upon which the temporal templates could be compared. The central ($\mu$) and scale invariant ($\nu$) moments were calculated for the following moments $pq \in {20, 11, 02, 30, 21, 12, 03, 22}$ [4]. The 7 main Hu Moments [6][2] were then calculated from the scale invariant moments. However, after much testing and training, it was determined that the scale invariant moments gave the best results.</p>
 <h3 id="Training-and-Prediction"><a href="#Training-and-Prediction" class="headerlink" title="Training and Prediction"></a>Training and Prediction</h3><p>A large dataset of videos [1] was used as input for training. The K-nearest neighbor algorithm was used to train, classify, and predict the videos. The K-nearest neighbor algorithm works by classifying input based on a plurality vote of nearest neighbors. The features used for training and prediction for this dataset was found to be a combination of the scale invariant features ($\nu$) and the Hu moments. The primary factor here was, in using the Hu moments as features, that enough differentiation was not provided and there was an increase in false positives when testing.</p>
-<h2 id="Results-and-performance-statistics"><a href="#Results-and-performance-statistics" class="headerlink" title="Results and performance statistics"></a>Results and performance statistics</h2><p><em>Figure 3: Training results | 90.8% accuracy</em><br><img src="resources/5EC509D8F11D712DBCE8FF4606A860E2.png =460x345" alt="training.png"></p>
-<p><em>Figure 4: Test results | 84.1% accuracy</em><br><img src="resources/64911BF7A62AE57DF347A9A11D123452.png =460x345" alt="test.png"></p>
+<h2 id="Results-and-performance-statistics"><a href="#Results-and-performance-statistics" class="headerlink" title="Results and performance statistics"></a>Results and performance statistics</h2><p><em>Figure 3: Training results | 90.8% accuracy</em><br><img src="/resources/5EC509D8F11D712DBCE8FF4606A860E2.png =460x345" alt="training.png"></p>
+<p><em>Figure 4: Test results | 84.1% accuracy</em><br><img src="/resources/64911BF7A62AE57DF347A9A11D123452.png =460x345" alt="test.png"></p>
 <p>Figures 3 and 4 give a confusion matrix on the overall results from training and testing.</p>
 <h3 id="Experiment"><a href="#Experiment" class="headerlink" title="Experiment"></a>Experiment</h3><p>In addition to the single activity videos used to train and test against, videos with multiple activities within the same video were run as an experiment (sample frames in Figure 6). The method used for each multiple activity video did the following:</p>
 <p><em>Labels = Dictionary of labels $\rightarrow$ $\tau$ values</em> initialize<br><span>$Frame_List=1 + max(\tau)$</span></p>
@@ -115,11 +115,11 @@
 </table>
 <p><em>Table 2</em></p>
 <p>The accuracy of the multiple activity videos was hit-or-miss. For example, in the video of just <em>handclapping</em> and <em>boxing</em>, the accuracy was outstanding, showing an above 90% accuracy (see Figure 5). However, in the multitude activity video, accuracy declined. Some of this was due to the definition of <em>jogging</em> versus <em>running</em>, but there were also misclassifications (see Figure 6). Throughout the multiple activity videos, there were misclassifications (see Figure 11), mostly among their two major groups (as discussed above), i.e. <em>walking</em> getting classified as <em>jogging</em>, <em>boxing</em> as <em>handclapping</em>, etc.</p>
-<p><em>Figure 5: Handclapping and Boxing | 90.7% accuracy</em><br><img src="resources/4E165FF834E416F58336EF37445CE402.png =460x345" alt="handclapping_boxing_matrix.png"><br><em>N.B. $nan$ means that label was not expected</em></p>
-<p><em>Figure 6: Multitude | 36.4% accuracy</em><br><img src="resources/2F9E7EA10E826520B4DB2FED7F3AEDAB.png =460x345" alt="multitude_matrix.png"><br><em>N.B. $nan$ means that label was not expected</em></p>
-<p><img src="resources/095BFCDDB5ACD1A9E10E6C8440C2341E.png =284x160" alt="experiment_1_160.png"> <img src="resources/5EC4CE79902E1C304DCE17A1B94331B7.png =284x160" alt="experiment_3_1232.png"></p>
-<p><img src="resources/89A45B61265B78D82C15B9CCBC5BD161.png =284x160" alt="experiment_2_1096.png"> <img src="resources/F101A2C26F3D379CA8E578F7C3D761C4.png =284x160" alt="experiment_2_524.png"></p>
-<p><img src="resources/A715ADD3B15BCD043840813FC32E721F.png =284x160" alt="experiment_3_468.png"> <img src="resources/FB3BA8C32C0C1DFFB7DD20B769DA7645.png =284x160" alt="experiment_1_1076.png"></p>
+<p><em>Figure 5: Handclapping and Boxing | 90.7% accuracy</em><br><img src="/resources/4E165FF834E416F58336EF37445CE402.png =460x345" alt="handclapping_boxing_matrix.png"><br><em>N.B. $nan$ means that label was not expected</em></p>
+<p><em>Figure 6: Multitude | 36.4% accuracy</em><br><img src="/resources/2F9E7EA10E826520B4DB2FED7F3AEDAB.png =460x345" alt="multitude_matrix.png"><br><em>N.B. $nan$ means that label was not expected</em></p>
+<p><img src="/resources/095BFCDDB5ACD1A9E10E6C8440C2341E.png =284x160" alt="experiment_1_160.png"> <img src="resources/5EC4CE79902E1C304DCE17A1B94331B7.png =284x160" alt="experiment_3_1232.png"></p>
+<p><img src="/resources/89A45B61265B78D82C15B9CCBC5BD161.png =284x160" alt="experiment_2_1096.png"> <img src="resources/F101A2C26F3D379CA8E578F7C3D761C4.png =284x160" alt="experiment_2_524.png"></p>
+<p><img src="/resources/A715ADD3B15BCD043840813FC32E721F.png =284x160" alt="experiment_3_468.png"> <img src="resources/FB3BA8C32C0C1DFFB7DD20B769DA7645.png =284x160" alt="experiment_1_1076.png"></p>
 <p><strong>Figure 7:</strong> <em>Clockwise, starting in left corner: Boxing (correctly identified), Handwaving (incorrectly identified as clapping), Boxing (incorrectly identified as waving), Running (incorrectly identified as jogging), Walking (incorrectly identified as jogging), Handwaving (correctly identified</em></p>
 <h3 id="Analysis-of-weaknesses"><a href="#Analysis-of-weaknesses" class="headerlink" title="Analysis of weaknesses"></a>Analysis of weaknesses</h3><p>There were some weaknesses that came to light in running these<br>predictions:</p>
 <ul>
@@ -129,7 +129,7 @@
 <li>Still a fairly custom and brittle development process.</li>
 </ul>
 <h2 id="Comparison-to-the-state-of-the-art-methods"><a href="#Comparison-to-the-state-of-the-art-methods" class="headerlink" title="Comparison to the state-of-the-art methods"></a>Comparison to the state-of-the-art methods</h2><p>In comparison of the methodology used to the state-of-the-art methods, we can look at the results obtained from usage of an identical dataset from the Schuldt, et al [8]. In comparing the confusion matrices from the Local SVM Approach to this one, the results obtained from the usage of MHI were quite better and more consistently accurate.</p>
-<p><img src="resources/1F9C0CCB9196C390E225FB74D38F5D0C.png =363x126" alt="svm_comp.png"></p>
+<p><img src="/resources/1F9C0CCB9196C390E225FB74D38F5D0C.png =363x126" alt="svm_comp.png"></p>
 <table>
 <thead>
 <tr>
@@ -820,9 +820,9 @@
     </summary>
     
     
-      <category term="Node.js" scheme="http://ralucas.github.io/tags/Node-js/"/>
-    
       <category term="Testing" scheme="http://ralucas.github.io/tags/Testing/"/>
+    
+      <category term="Node.js" scheme="http://ralucas.github.io/tags/Node-js/"/>
     
       <category term="Request" scheme="http://ralucas.github.io/tags/Request/"/>
     
@@ -890,9 +890,9 @@
     </summary>
     
     
-      <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
-    
       <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
+    
+      <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
     
   </entry>
   
