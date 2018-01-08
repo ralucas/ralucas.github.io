@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2018-01-08T02:36:31.458Z</updated>
+  <updated>2018-01-08T02:41:51.869Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/"/>
     <id>http://ralucas.github.io/2017/12/03/Activity-Classification-using-MHI-Techniques/</id>
     <published>2017-12-03T07:00:00.000Z</published>
-    <updated>2018-01-08T02:36:31.458Z</updated>
+    <updated>2018-01-08T02:41:51.869Z</updated>
     
     <content type="html"><![CDATA[<p><em>Activity classification by computers has a rich history and this paper seeks to describe, analyze, and compare some methods used in classifying a subset of actions. The creation of temporal templates via motion-energy images (MEI) and motion history images (MHI) were utilized to analyze and quantify frames of videos. Image moments were taken from the MHIs and a learning model was built. The results obtained are compared and discussed along with other comparative methods. The activities focused on were boxing, handclapping, handwaving, running, jogging, and walking.</em></p>
 <h2 id="Interesting-Links"><a href="#Interesting-Links" class="headerlink" title="Interesting Links"></a>Interesting Links</h2><ul>
@@ -36,7 +36,7 @@
 <h2 id="Methodology-and-implementation-used"><a href="#Methodology-and-implementation-used" class="headerlink" title="Methodology and implementation used"></a>Methodology and implementation used</h2><p>Temporal templates were used to create modeled images over a period of time, traditional image moments [9][4][6][2] were then taken and a model was trained.</p>
 <h3 id="Temporal-Templates"><a href="#Temporal-Templates" class="headerlink" title="Temporal Templates"></a>Temporal Templates</h3><p>Two types of temporal templates were created: motion-energy images (or binary images) (MEIs) and motion-history images (MHIs). In creating these images, each video frame was taken through a preprocessing step in order to better extract the purposeful, activity related motion from the background and tangential motions within each frame. This was done b first grayscaling each frame, then running the frame through OpenCV Gaussian blurring and morphing functions.</p>
 <p>The MEIs were created by taking a temporal diff from each frame and assigning coordinates with a 0 or 1 given if the temporal difference was greater than a constant $\theta$ or not (see examples in figure 1). A $\theta$ of $14$ was used throughout the training and testing phases as it was determined to give the best results.</p>
-<div style="display:flex;"><br><img align="left" width="160" height="120" src="/resources/A19C0C2A9DEED833992394DAB24C3EE7.png" alt="mei_image_boxing_person05_d3_10.png"><br><img align="right" alt="mei_image_handwaving_person01_d3_12.png" src="/resources/ADC2C3C9010B694FB9C870F47C89C5EF.png" width="160" height="120"><br></div><br><div style="display:flex;"><br><img align="left" width="160" height="120" src="/resources/206EF4CD0F290B8C44E39F800AAF6826.png" alt="mei_image_walking_person04_d3_20.png"><br><img align="right" width="160" height="120" src="/resources/889A6EB6627389DACAA15AFCB8DDBE01.png" alt="mei_image_handclapping_person05_d3_4.png"><br></div><br><div style="display:flex;"><br><img align="left" width="160" height="120" src="(/resources/58CCB63298A0D0C74797DC0B6133BE59.png" alt="![mei_image_jogging_person04_d3_0.png]"><br><img align="right" width="160" height="120" src="/resources/646C7B58F989519A1C2838B9718699DF.png" alt="mei_image_running_person05_d3_2.png"><br></div>
+<div style="display:flex;"><br><img align="left" width="160" height="120" src="/resources/A19C0C2A9DEED833992394DAB24C3EE7.png" alt="mei_image_boxing_person05_d3_10.png"><br><img align="right" alt="mei_image_handwaving_person01_d3_12.png" src="/resources/ADC2C3C9010B694FB9C870F47C89C5EF.png" width="160" height="120"><br></div><br><div style="display:flex;"><br><img align="left" width="160" height="120" src="/resources/206EF4CD0F290B8C44E39F800AAF6826.png" alt="mei_image_walking_person04_d3_20.png"><br><img align="right" width="160" height="120" src="/resources/889A6EB6627389DACAA15AFCB8DDBE01.png" alt="mei_image_handclapping_person05_d3_4.png"><br></div><br><div style="display:flex;"><br><img align="left" width="160" height="120" src="(/resources/58CCB63298A0D0C74797DC0B6133BE59.png" alt="mei_image_jogging_person04_d3_0.png"><br><img align="right" width="160" height="120" src="/resources/646C7B58F989519A1C2838B9718699DF.png" alt="mei_image_running_person05_d3_2.png"><br></div>
 
 <p><strong>Figure 1</strong>: <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em></p>
 <p>The MHIs were built from those binary images and provide a more nuanced and graded view of the motion over time. These were calculated utilizing hand-crafted constants $\tau$, in which over time gradients were developed. Figure 2 shows an example of different people handwaving as it shows more of the change over time versus the constant that the MEIs show.</p>
@@ -888,9 +888,9 @@
     </summary>
     
     
-      <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
-    
       <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
+    
+      <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
     
   </entry>
   
