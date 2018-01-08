@@ -184,16 +184,16 @@
 <h2 id="Methodology-and-implementation-used"><a href="#Methodology-and-implementation-used" class="headerlink" title="Methodology and implementation used"></a>Methodology and implementation used</h2><p>Temporal templates were used to create modeled images over a period of time, traditional image moments [9][4][6][2] were then taken and a model was trained.</p>
 <h3 id="Temporal-Templates"><a href="#Temporal-Templates" class="headerlink" title="Temporal Templates"></a>Temporal Templates</h3><p>Two types of temporal templates were created: motion-energy images (or binary images) (MEIs) and motion-history images (MHIs). In creating these images, each video frame was taken through a preprocessing step in order to better extract the purposeful, activity related motion from the background and tangential motions within each frame. This was done b first grayscaling each frame, then running the frame through OpenCV Gaussian blurring and morphing functions.</p>
 <p>The MEIs were created by taking a temporal diff from each frame and assigning coordinates with a 0 or 1 given if the temporal difference was greater than a constant $\theta$ or not (see examples in figure 1). A $\theta$ of $14$ was used throughout the training and testing phases as it was determined to give the best results.</p>
-<p><img src="/resources/A19C0C2A9DEED833992394DAB24C3EE7.png =160x120" alt="mei_image_boxing_person05_d3_10.png"> <img src="resources/ADC2C3C9010B694FB9C870F47C89C5EF.png =160x120" alt="mei_image_handwaving_person01_d3_12.png"></p>
-<p><img src="/resources/206EF4CD0F290B8C44E39F800AAF6826.png =160x120" alt="mei_image_walking_person04_d3_20.png"> <img src="resources/889A6EB6627389DACAA15AFCB8DDBE01.png =160x120" alt="mei_image_handclapping_person05_d3_4.png"></p>
-<p><img src="/resources/58CCB63298A0D0C74797DC0B6133BE59.png =160x120" alt="mei_image_jogging_person04_d3_0.png"> <img src="resources/646C7B58F989519A1C2838B9718699DF.png =160x120" alt="mei_image_running_person05_d3_2.png"><br><strong>Figure 1</strong>: <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em></p>
+<p><img src="/resources/A19C0C2A9DEED833992394DAB24C3EE7.png =160x120" alt="mei_image_boxing_person05_d3_10.png"> <img src="/resources/ADC2C3C9010B694FB9C870F47C89C5EF.png =160x120" alt="mei_image_handwaving_person01_d3_12.png"></p>
+<p><img src="/resources/206EF4CD0F290B8C44E39F800AAF6826.png =160x120" alt="mei_image_walking_person04_d3_20.png"> <img src="/resources/889A6EB6627389DACAA15AFCB8DDBE01.png =160x120" alt="mei_image_handclapping_person05_d3_4.png"></p>
+<p><img src="/resources/58CCB63298A0D0C74797DC0B6133BE59.png =160x120" alt="mei_image_jogging_person04_d3_0.png"> <img src="/resources/646C7B58F989519A1C2838B9718699DF.png =160x120" alt="mei_image_running_person05_d3_2.png"><br><strong>Figure 1</strong>: <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em></p>
 <p>The MHIs were built from those binary images and provide a more nuanced and graded view of the motion over time. These were calculated utilizing hand-crafted constants $\tau$, in which over time gradients were developed. Figure 2 shows an example of different people handwaving as it shows more of the change over time versus the constant that the MEIs show.</p>
 <p>In creation of these temporal templates, the $\tau$ constant value for each activity was additionally used (Table 1) a demarcation for how many frames to analyze from a video, so the video sequences (as outlined in the sequences[1]) were divided further into small $\tau$ based chunks. This allowed for consistent training of an activity and expanding the total number of training samples, therefore giving more to the trained model to improve upon prediction.</p>
 <table>
 <thead>
 <tr>
-<th></th>
-<th></th>
+<th>Activity</th>
+<th>Tau</th>
 </tr>
 </thead>
 <tbody>
@@ -224,9 +224,9 @@
 </tbody>
 </table>
 <p><em>Table 1</em></p>
-<p><img src="/resources/31DF5A4229040E941925BCAA6766B5A9.png =160x120" alt="mhi_image_boxing_person04_d3_3.png"> <img src="resources/A5627A0DA267394D6B3BE27EC2A0AB91.png =160x120" alt="mhi_image_handwaving_person05_d3_30.png"></p>
-<p><img src="/resources/5DAB00468AFD541B0A7E0165381C3E02.png =160x120" alt="mhi_image_walking_person05_d3_7.png"> <img src="resources/F1E8F01CB2227A18975836934E58F422.png =160x120" alt="mhi_image_handclapping_person03_d3_6.png"></p>
-<p><img src="/resources/E56FAD24DF1E1D637212375E26C0A87D.png =160x120" alt="mhi_image_jogging_person02_d3_7.png"> <img src="resources/70539DBC7EF87041DC08B733DFDD0242.png =160x120" alt="mhi_image_running_person05_d3_10.png"></p>
+<p><img src="/resources/31DF5A4229040E941925BCAA6766B5A9.png" alt="mhi_image_boxing_person04_d3_3.png"> <img src="/resources/A5627A0DA267394D6B3BE27EC2A0AB91.png" alt="mhi_image_handwaving_person05_d3_30.png"></p>
+<p><img src="/resources/5DAB00468AFD541B0A7E0165381C3E02.png" alt="mhi_image_walking_person05_d3_7.png"> <img src="/resources/F1E8F01CB2227A18975836934E58F422.png" alt="mhi_image_handclapping_person03_d3_6.png"></p>
+<p><img src="/resources/E56FAD24DF1E1D637212375E26C0A87D.png" alt="mhi_image_jogging_person02_d3_7.png"> <img src="/resources/70539DBC7EF87041DC08B733DFDD0242.png" alt="mhi_image_running_person05_d3_10.png"></p>
 <p><strong>Figure 2:</strong> <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em> </p>
 <h3 id="Image-Moments"><a href="#Image-Moments" class="headerlink" title="Image Moments"></a>Image Moments</h3><p>Image moments for each MHI were taken to develop a feature set upon which the temporal templates could be compared. The central ($\mu$) and scale invariant ($\nu$) moments were calculated for the following moments $pq \in {20, 11, 02, 30, 21, 12, 03, 22}$ [4]. The 7 main Hu Moments [6][2] were then calculated from the scale invariant moments. However, after much testing and training, it was determined that the scale invariant moments gave the best results.</p>
 <h3 id="Training-and-Prediction"><a href="#Training-and-Prediction" class="headerlink" title="Training and Prediction"></a>Training and Prediction</h3><p>A large dataset of videos [1] was used as input for training. The K-nearest neighbor algorithm was used to train, classify, and predict the videos. The K-nearest neighbor algorithm works by classifying input based on a plurality vote of nearest neighbors. The features used for training and prediction for this dataset was found to be a combination of the scale invariant features ($\nu$) and the Hu moments. The primary factor here was, in using the Hu moments as features, that enough differentiation was not provided and there was an increase in false positives when testing.</p>
@@ -242,8 +242,8 @@
 <table>
 <thead>
 <tr>
-<th></th>
-<th></th>
+<th>Method</th>
+<th>Time (s)</th>
 </tr>
 </thead>
 <tbody>
@@ -252,7 +252,7 @@
 <td>0.45s</td>
 </tr>
 <tr>
-<td>Moments calculation:</td>
+<td>Moments calculation</td>
 <td>0.013s</td>
 </tr>
 <tr>
