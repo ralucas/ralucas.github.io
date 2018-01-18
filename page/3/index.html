@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Node.js and more...">
-    <meta name="keyword"  content="Node.js, JavaScript, Networking, TCP, Code, Running, HTTP">
+    <meta name="description" content="CS stuff and more...">
+    <meta name="keyword"  content="Python, Computer Vision, Node.js, JavaScript, Networking, TCP, Code, Running, HTTP">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
     <title>
@@ -131,7 +131,7 @@
                 <div class="site-heading">
                     <h1>Richard Lucas&#39; Blog</h1>
                     <!--<hr class="small">-->
-                    <span class="subheading">Node.js and more...</span>
+                    <span class="subheading">CS stuff and more...</span>
                 </div>
             </div>
         </div>
@@ -324,7 +324,7 @@ Here’s the function from Douglas Crockford’s website:
                         
 
                         
-                            <p>My blog about Node.js and other software topics I&#39;m interested in.</p>
+                            <p>My blog about Computer Science and other software topics I&#39;m interested in.</p>
                         
 
                         <!-- SNS Link -->
@@ -545,8 +545,40 @@ Here’s the function from Douglas Crockford’s website:
 
 <!-- Image to hack wechat -->
 <img src="http://ralucas.github.io/img/icon_wechat.png" width="0" height="0" />
-<!-- Migrate from head to bottom, no longer block render and still work --><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
 
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
 </body>
 
 </html>

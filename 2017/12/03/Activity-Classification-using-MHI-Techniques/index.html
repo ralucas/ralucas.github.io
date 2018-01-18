@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Node.js and more...">
-    <meta name="keyword"  content="Node.js, JavaScript, Networking, TCP, Code, Running, HTTP">
+    <meta name="description" content="CS stuff and more...">
+    <meta name="keyword"  content="Python, Computer Vision, Node.js, JavaScript, Networking, TCP, Code, Running, HTTP">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
     <title>
@@ -183,11 +183,11 @@
 <p>In more recent work, the use of still poses and poselets (body part detection from joint and part positions) [7] to develop an underlying stick figure representation found good results in identifying activities. Additionally, this research took into account the 3D orientation from a trained model. The method achieved results of ~60% correct identification with just the poselet representation and ~65% when the object model was added. Another recent study [3] utilized summary dynamic rgb images and convolution neural network (CNN) to develop a system in which identification was done quickly and reasonably successfully as the researchers were able to get ~89% successful identification.</p>
 <h2 id="Methodology-and-implementation-used"><a href="#Methodology-and-implementation-used" class="headerlink" title="Methodology and implementation used"></a>Methodology and implementation used</h2><p>Temporal templates were used to create modeled images over a period of time, traditional image moments [9][4][6][2] were then taken and a model was trained.</p>
 <h3 id="Temporal-Templates"><a href="#Temporal-Templates" class="headerlink" title="Temporal Templates"></a>Temporal Templates</h3><p>Two types of temporal templates were created: motion-energy images (or binary images) (MEIs) and motion-history images (MHIs). In creating these images, each video frame was taken through a preprocessing step in order to better extract the purposeful, activity related motion from the background and tangential motions within each frame. This was done b first grayscaling each frame, then running the frame through OpenCV Gaussian blurring and morphing functions.</p>
-<p>The MEIs were created by taking a temporal diff from each frame and assigning coordinates with a 0 or 1 given if the temporal difference was greater than a constant $\theta$ or not (see examples in figure 1). A $\theta$ of $14$ was used throughout the training and testing phases as it was determined to give the best results.</p>
+<p>The MEIs were created by taking a temporal diff from each frame and assigning coordinates with a 0 or 1 given if the temporal difference was greater than a constant <span>$\theta$</span><!-- Has MathJax --> or not (see examples in figure 1). A $\theta$ of <code>14</code> was used throughout the training and testing phases as it was determined to give the best results.</p>
 <div style="display:flex;"><br><img align="left" width="160" height="120" src="/resources/A19C0C2A9DEED833992394DAB24C3EE7.png" alt="mei_image_boxing_person05_d3_10.png"><br><img align="right" alt="mei_image_handwaving_person01_d3_12.png" src="/resources/ADC2C3C9010B694FB9C870F47C89C5EF.png" width="160" height="120"><br></div><br><div style="display:flex;"><br><img align="left" width="160" height="120" src="/resources/206EF4CD0F290B8C44E39F800AAF6826.png" alt="mei_image_walking_person04_d3_20.png"><br><img align="right" width="160" height="120" src="/resources/889A6EB6627389DACAA15AFCB8DDBE01.png" alt="mei_image_handclapping_person05_d3_4.png"><br></div><br><div style="display:flex;"><br><img align="left" width="160" height="120" src="/resources/58CCB63298A0D0C74797DC0B6133BE59.png" alt="mei_image_jogging_person04_d3_0.png"><br><img align="right" width="160" height="120" src="/resources/646C7B58F989519A1C2838B9718699DF.png" alt="mei_image_running_person05_d3_2.png"><br></div>
 
 <p><strong>Figure 1</strong>: <em>Clockwise, starting in left corner: Boxing, Handwaving, Handclapping, Running, Jogging, Walking</em></p>
-<p>The MHIs were built from those binary images and provide a more nuanced and graded view of the motion over time. These were calculated utilizing hand-crafted constants $\tau$, in which over time gradients were developed. Figure 2 shows an example of different people handwaving as it shows more of the change over time versus the constant that the MEIs show.</p>
+<p>The MHIs were built from those binary images and provide a more nuanced and graded view of the motion over time. These were calculated utilizing hand-crafted constants <span>$\tau$</span><!-- Has MathJax -->, in which over time gradients were developed. Figure 2 shows an example of different people handwaving as it shows more of the change over time versus the constant that the MEIs show.</p>
 <p>In creation of these temporal templates, the $\tau$ constant value for each activity was additionally used (Table 1) a demarcation for how many frames to analyze from a video, so the video sequences (as outlined in the sequences[1]) were divided further into small $\tau$ based chunks. This allowed for consistent training of an activity and expanding the total number of training samples, therefore giving more to the trained model to improve upon prediction.</p>
 <table>
 <thead>
@@ -233,8 +233,9 @@
 <p><em>Figure 4: Test results | 84.1% accuracy</em><br><img width="460" height="345" src="/resources/64911BF7A62AE57DF347A9A11D123452.png" alt="test.png"></p>
 <p>Figures 3 and 4 give a confusion matrix on the overall results from training and testing.</p>
 <h3 id="Experiment"><a href="#Experiment" class="headerlink" title="Experiment"></a>Experiment</h3><p>In addition to the single activity videos used to train and test against, videos with multiple activities within the same video were run as an experiment (sample frames in Figure 6). The method used for each multiple activity video did the following:</p>
-<p><em>Labels = Dictionary of labels $\rightarrow$ $\tau$ values</em> initialize<br><span>$Frame_List=1 + max(\tau)$</span></p>
+<p><em>Labels = Dictionary of labels $\rightarrow$ $\tau$ values</em> initialize<br><span>$FrameList=1 + max(\tau)$</span></p>
 <p>As outlined in Algorithm [dmap], multiple activity prediction, first gets an initial prediction by building an array of frames. Then as that frame list is iterated over and $mei$ and $mhi$ images are built, when the number of frames is equal to a $\tau$ value, a prediction from the predict engine is created based on the current $mhi$ values and that prediction is compared to the current $\tau$ label. If they are equal, then that label is returned and a $\tau$ number of frames is written and classified with that label.</p>
+<p><img width="500" src="/resources/algorithm1.png" alt="algorithm1"></p>
 <h2 id="Analysis-of-results"><a href="#Analysis-of-results" class="headerlink" title="Analysis of results"></a>Analysis of results</h2><p>The six activities could be further categorized into two primary groups: stationary activities and moving activities. Given this, focus can be placed on results within these categories. The most glaring issue is that of the <em>handclapping</em> results. The trainer most commonly confused it with <em>handwaving</em> and <em>boxing</em>, which does have similar motions.</p>
 <p>The moving activities also were difficult to separate, and particularly <em>running</em> and <em>jogging</em> proved to be quite difficult to distinguish between. However, given reasonably differentiated $\tau$ values, the variation was carried through. It could also be argued that the difference between jogging and running may be quite different from person to person, so I still believe that these two classifications are somewhat interchangeable.</p>
 <h3 id="Analysis-of-experiment"><a href="#Analysis-of-experiment" class="headerlink" title="Analysis of experiment"></a>Analysis of experiment</h3><p>As shown in Table 2, the performance times of algorithm used in the experiment was fairly slow. It took close to half a second to complete a full run of the algorithm of frame set analysis and write, which entails running the algorithm (see above) and write the newly labeled frames to video.</p>
@@ -560,8 +561,40 @@
 
 <!-- Image to hack wechat -->
 <img src="http://ralucas.github.io/img/icon_wechat.png" width="0" height="0" />
-<!-- Migrate from head to bottom, no longer block render and still work --><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
 
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
 </body>
 
 </html>
