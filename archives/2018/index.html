@@ -13,11 +13,11 @@
 
     <title>
         
-          Installing Postgres on Linux Mint - Richard Lucas&#39; Blog
+          Richard Lucas&#39; Blog
         
     </title>
 
-    <link rel="canonical" href="http://ralucas.github.io/2013/12/01/Installing-Postgres-on-Linux-Mint/">
+    <link rel="canonical" href="http://ralucas.github.io/archives/2018/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -124,164 +124,6 @@
 
     <!-- Main Content -->
     
-<!-- Image to hack wechat -->
-<!-- <img src="http://ralucas.github.io/img/icon_wechat.png" width="0" height="0"> -->
-<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
-
-<!-- Post Header -->
-<style type="text/css">
-    header.intro-header{
-        background-image: url('/img/orion-nebula.jpg')
-    }
-</style>
-<header class="intro-header" >
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <div class="post-heading">
-                    <div class="tags">
-                        
-                          <a class="tag" href="/tags/Linux-Mint/" title="Linux Mint">Linux Mint</a>
-                        
-                          <a class="tag" href="/tags/Postgres/" title="Postgres">Postgres</a>
-                        
-
-                    </div>
-                    <h1>Installing Postgres on Linux Mint</h1>
-                    
-                    <span class="meta">
-                        Posted by Richard Lucas on
-                        Dec 1 2013
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
-
-<!-- Post Content -->
-<article>
-    <div class="container">
-        <div class="row">
-
-    <!-- Post Container -->
-            <div class="
-                col-lg-8 col-lg-offset-2
-                col-md-10 col-md-offset-1
-                post-container">
-
-                <p>###A Quick Guide</p>
-<h2 id=""><a href="#" class="headerlink" title=""></a><img src="http://t0.gstatic.com/images?q=tbn:ANd9GcSedctFKvhSpQSI7ZU3X5Xh91EPfEL3J4FP2j_MVksu_isCcDURqw" alt=""></h2><p>Open up the terminal:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install postgresql</div></pre></td></tr></table></figure></p>
-<p>Installs Postgresql.  This will take a few minutes.</p>
-<p>Next:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo su - postgres</div></pre></td></tr></table></figure></p>
-<p>This logs you into the database as the postgres user.  You will then want to create yourself as a user:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ createuser your_username</div></pre></td></tr></table></figure></p>
-<p>Now, at the command prompt under your username, you are able to use createdb and other commands.  So, let’s create a quick database and connect to it.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ createdb myFirstDb</div></pre></td></tr></table></figure></p>
-<p>Connect to it:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ psql myFirstDb</div></pre></td></tr></table></figure></p>
-<p>You will then see a prompt that will look like:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">myFirstDb=#</div></pre></td></tr></table></figure></p>
-<p>The <code>#</code> indicates that you are the superuser, which is most likely if you just installed postgres on your local computer.</p>
-<p>Let’s run:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">myFirstDb=# SELECT Version();</div></pre></td></tr></table></figure></p>
-<p>This should go into a new screen on your terminal that should look something like this:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">                                                version                                                </div><div class="line">-------------------------------------------------------------------------------------------------------</div><div class="line"> PostgreSQL 9.1.10 on i686-pc-linux-gnu, compiled by gcc (Ubuntu/Linaro 4.8.1-10ubuntu7) 4.8.1, 32-bit</div><div class="line">(1 row)</div><div class="line"></div><div class="line">(END)</div></pre></td></tr></table></figure></p>
-<p>Type <code>q</code> to exit the screen and go back to the <code>#</code> prompt.</p>
-<p>You can run commands from the <code>#</code> prompt using <code>\</code> notation and the official documentation on commands can be found here: <a href="http://www.postgresql.org/docs/9.3/interactive/app-psql.html" target="_blank" rel="external">http://www.postgresql.org/docs/9.3/interactive/app-psql.html</a></p>
-<p>If you want a GUI client:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install pgadmin3</div></pre></td></tr></table></figure></p>
-
-
-                <hr>
-
-                
-
-                <ul class="pager">
-                    
-                        <li class="previous">
-                            <a href="/2013/12/10/Importing-CSV-in-Postgres/" data-toggle="tooltip" data-placement="top" title="Importing CSV in Postgres">&larr; Previous Post</a>
-                        </li>
-                    
-                    
-                        <li class="next">
-                            <a href="/2013/11/01/Using-Crockford-s-supplant-function-in-Javascript/" data-toggle="tooltip" data-placement="top" title="Using Crockford's supplant function in Javascript">Next Post &rarr;</a>
-                        </li>
-                    
-                </ul>
-
-                
-
-                
-
-            </div>
-
-    <!-- Sidebar Container -->
-
-            <div class="
-                col-lg-8 col-lg-offset-2
-                col-md-10 col-md-offset-1
-                sidebar-container">
-
-                <!-- Featured Tags -->
-                
-            </div>
-
-        </div>
-    </div>
-</article>
-
-<section id="comments" class="container">
-  <div id="disqus_thread"></div>
-<section>
-
-<!-- disqus start -->
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES * * */
-    var disqus_shortname = "ralucas";
-    var disqus_identifier = "http://ralucas.github.io/2013/12/01/Installing-Postgres-on-Linux-Mint/";
-    var disqus_url = "http://ralucas.github.io/2013/12/01/Installing-Postgres-on-Linux-Mint/";
-
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
-<!-- disqu(s end -->
-
-
-
-
-<!-- async load function -->
-<script>
-    function async(u, c) {
-      var d = document, t = 'script',
-          o = d.createElement(t),
-          s = d.getElementsByTagName(t)[0];
-      o.src = u;
-      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
-      s.parentNode.insertBefore(o, s);
-    }
-</script>
-<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
-<script>
-    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
-        anchors.options = {
-          visible: 'always',
-          placement: 'right',
-          icon: '#'
-        };
-        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
-    })
-</script>
-<style>
-    /* place left on bigger screen */
-    @media all and (min-width: 800px) {
-        .anchorjs-link{
-            position: absolute;
-            left: -0.75em;
-            font-size: 1.1em;
-            margin-top : -0.1em;
-        }
-    }
-</style>
-
-
 
     <!-- Footer -->
     <!-- Footer -->

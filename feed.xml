@@ -5,7 +5,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="http://ralucas.github.io/"/>
-  <updated>2018-01-18T04:48:43.186Z</updated>
+  <updated>2018-02-25T19:28:31.133Z</updated>
   <id>http://ralucas.github.io/</id>
   
   <author>
@@ -14,6 +14,42 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Elixir&#39;s with (or within you without you :))</title>
+    <link href="http://ralucas.github.io/2018/02/25/Elixir-With-or-Within-You-Without-You/"/>
+    <id>http://ralucas.github.io/2018/02/25/Elixir-With-or-Within-You-Without-You/</id>
+    <published>2018-02-25T19:28:31.000Z</published>
+    <updated>2018-02-25T19:28:31.133Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="Before-we-get-with-it…A-quick-pattern-matching-review"><a href="#Before-we-get-with-it…A-quick-pattern-matching-review" class="headerlink" title="Before we get with it…A quick pattern matching review"></a>Before we get <code>with</code> it…A quick pattern matching review</h3><p>In Elixir, the <code>=</code> operator is actually called the <em>match operator</em>. While, we can usually see it as assignment, in Elixirland, it’s much easier if we can see it as pattern matching [1].<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">iex&gt; x = 1</div><div class="line">  1</div><div class="line">iex&gt; x</div><div class="line">  1</div><div class="line">iex&gt; 1 = x</div><div class="line">  1</div><div class="line">iex&gt; 2 = x</div><div class="line">  ** (MatchError) no match of right hand side value: 1</div></pre></td></tr></table></figure></p>
+<p>Another quick example (taken from <a href="https://elixir-lang.org/getting-started/pattern-matching.html" target="_blank" rel="external">Elixir docs</a>) [2]:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">iex&gt; &#123;:ok, result&#125; = &#123;:ok, 13&#125;</div><div class="line">  &#123;:ok, 13&#125;</div><div class="line">iex&gt; result</div><div class="line">  13</div></pre></td></tr></table></figure></p>
+<p>And in the context of program (<code>example_1.exs</code>):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">defmodule Example1 do</div><div class="line">  def say_hello(&quot;hello&quot;) do</div><div class="line">    &quot;What&apos;s shaking Meetup?&quot;</div><div class="line">  end</div><div class="line">  def say_hello(&quot;hola&quot;) do</div><div class="line">    &quot;Hola mi amigos&quot;</div><div class="line">  end</div><div class="line">  def say_hello(msg) do</div><div class="line">    &quot;I don&apos;t understand #&#123;msg&#125;&quot;</div><div class="line">  end</div><div class="line">end</div></pre></td></tr></table></figure></p>
+<p>Run <code>$ iex example_1.exs</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">iex(1)&gt; Example1.say_hello(&quot;hi&quot;)</div><div class="line">&quot;I don&apos;t understand hi&quot;</div><div class="line">iex(2)&gt; Example1.say_hello(&quot;hello&quot;)</div><div class="line">&quot;What&apos;s shaking Meetup?&quot;</div><div class="line">iex(3)&gt; Example1.say_hello(&quot;hola&quot;)</div><div class="line">&quot;Hola mi amigos&quot;</div></pre></td></tr></table></figure></p>
+<h4 id="Quick-sidebar-note-from-the-Elixir-docs"><a href="#Quick-sidebar-note-from-the-Elixir-docs" class="headerlink" title="Quick sidebar note from the Elixir docs:"></a>Quick sidebar note from the Elixir docs:</h4><p>In addition to the Elixir file extension <code>.ex</code>, Elixir also supports <code>.exs</code> files for scripting. Elixir treats both files exactly the same way, the only difference is in intention. <code>.ex</code> files are meant to be compiled while .exs files are used for scripting. When executed, both extensions compile and load their modules into memory, although only <code>.ex</code> files write their bytecode to disk in the format of <code>.beam</code> files [3].</p>
+<h3 id="Almost-with-it…A-quick-review-of-pipes"><a href="#Almost-with-it…A-quick-review-of-pipes" class="headerlink" title="Almost with it…A quick review of pipes"></a>Almost <code>with</code> it…A quick review of pipes</h3><p>I’m hoping you have some experience with Unix pipes as these are similar.  From the docs, “The <code>|&gt;</code> symbol…is the pipe operator: it takes the output from the expression on its left side and passes it as the first argument to the function call on its right side.” [4] They allow the ability to <em>Stream</em> from one operation to the next.</p>
+<p>An example:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1..500 |&gt; </div><div class="line">  Enum.map(fn x -&gt; x / 2 end) |&gt; </div><div class="line">  Enum.filter(fn x -&gt; x &gt; 200 end) |&gt; </div><div class="line">  Enum.count</div></pre></td></tr></table></figure></p>
+<h3 id="What-is-with"><a href="#What-is-with" class="headerlink" title="What is with?"></a>What is <code>with</code>?</h3><p>The <code>with</code> operator is a control flow mechanism that allows a sequence of operations to return a value or the ability to break out of that sequence.</p>
+<p>Let’s look at some examples from Jose:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">with &#123;:ok, x&#125; &lt;- ok(1),</div><div class="line">     &#123;:ok, y&#125; &lt;- ok(2),</div><div class="line">     do: &#123;:ok, x + y&#125;</div><div class="line">#=&gt; &#123;:ok, 3&#125;</div></pre></td></tr></table></figure>
+<p>If they all match in the sequence, we’re done.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">with &#123;:ok, x&#125; &lt;- ok(1),</div><div class="line">     &#123;:ok, y&#125; &lt;- error(2),</div><div class="line">     do: &#123;:ok, x + y&#125;</div><div class="line">#=&gt; &#123;:error, 2&#125;</div></pre></td></tr></table></figure></p>
+<p>Here, because they don’t, the sequence is aborted and an error is returned.</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;Before-we-get-with-it…A-quick-pattern-matching-review&quot;&gt;&lt;a href=&quot;#Before-we-get-with-it…A-quick-pattern-matching-review&quot; class=&quot;heade
+    
+    </summary>
+    
+    
+      <category term="Elixir" scheme="http://ralucas.github.io/tags/Elixir/"/>
+    
+      <category term="with" scheme="http://ralucas.github.io/tags/with/"/>
+    
+      <category term="Pattern Matching" scheme="http://ralucas.github.io/tags/Pattern-Matching/"/>
+    
+  </entry>
   
   <entry>
     <title>Activity Classification using MHI Techniques</title>
@@ -889,9 +925,9 @@
     </summary>
     
     
-      <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
-    
       <category term="Linux Mint" scheme="http://ralucas.github.io/tags/Linux-Mint/"/>
+    
+      <category term="Postgres" scheme="http://ralucas.github.io/tags/Postgres/"/>
     
   </entry>
   
@@ -1098,44 +1134,6 @@
       <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
     
       <category term="Injury" scheme="http://ralucas.github.io/tags/Injury/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Tough Mudder Review</title>
-    <link href="http://ralucas.github.io/2013/05/01/Tough-Mudder-Review/"/>
-    <id>http://ralucas.github.io/2013/05/01/Tough-Mudder-Review/</id>
-    <published>2013-05-01T23:46:15.000Z</published>
-    <updated>2015-02-02T03:24:57.000Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1385447221/262292_10151580137014630_246172225_n_uxcfmr.jpg" alt="The Tough Mudder Group"></p>
-<p>So, I did the Tough Mudder here in Ohio this past Saturday with my sister and a couple of people that joined our team after I put up forum post for team members.  It was held in Mansfield, OH about an hour north of Columbus.</p>
-<p>My sister and I signed up for it, not really knowing much about it, back in the fall of last year.  I had heard a friend mention it and I thought that it sounded like a good challenge.  It costs us, I believe, around $120 to do the event.</p>
-<p>The Tough Mudder is basically an obstacles course with muddy terrain and is part of the growing phenomenon of these obstacle-type runs that seem to be popping up everywhere.  It took place at what seemed to be a farm near Mansfield, Ohio. It’s a ten mile course and they had 22 obstacles.  They range from crawling under barb wire for 15 feet to climbing over walls that are 15 feet to just running/walking through a muddy path.  Some of the obstacles can be a bit tough, particularly as the day wears on.</p>
-<p>My sister and I signed up, but we needed to get more team members.  Unfortunately, we couldn’t convince any of our friends to join us, so we put up a post on the forums and Adriana and Bob responded to join our team.  We really couldn’t have asked for better teammates.  They were great.</p>
-<p>Okay, so we trained and then finally came the day of the event.  The emails from the organization told us to try to arrive 2 hours earlier than your start time.  Being an unbeliever in showing up too early for anything, we blew that off and decided to show up an hour early.  Well, we should have listened to them.  There was a huge crowd, traffic, parking lines, and then we got bussed to the race field.  We estimated that if they had about 9,000 participants per day going through the course.  That’s quite a bit. We ended up arriving about 40 minutes late.  So, we should have taken that 2 hours prior a bit more seriously.</p>
-<p>We really lucked out, though: it was a beautiful day - mid-60s and sunny. Upon arriving, we located Bob and Adriana and jetted off to start of the race. Before beginning, the MC gave a 20 minute speech, trying to rile everyone up, going over the standards and rules, and of course, not forgetting to mention all of the corporate sponsors.  And then finally, we were off.</p>
-<p>The total time we spent out on the course was about 4-1/2 hours, which is basically the equivalent of a marathon time-wise.  For the most part, we tried to run/jog between the obstacles, giving into a walk when the mud became particularly heavy.  And the mud was heavy for the most part and it was everywhere.  Tying your shoes on tight is essential if you want to keep them on.</p>
-<p>Bob was the only team member to have successfully completed all the obstacles.  I felt like I did fairly well, only being unable to get past the monkey bars (my excuse: hands were too wet and slipped). Adriana completed the monkey bars successfully and was told that she was one of the few women to have accomplished that. And my sister had a lot of success and attempted every obstacle.</p>
-<p><strong>Toughest obstacle:</strong> Berlin Walls - Part of the reason was that I initially attempted this solo and didn’t make it.  Fortunately some fellows helped me over, but it was still rough pulling myself over the walls.</p>
-<p>As we neared the last 5 or 6 obstacles, lines began to grow and getting through the obstacles began to take more and more time.  This was a bit of a detractor and I thought that perhaps they should begin to limit the amount of people on the course per day as it really seemed like too many.</p>
-<p>I will say this, I was sore for about two days after it and even now have large bruises under my arms from lifting myself up on the walls.</p>
-<p>In terms of training, the Tough Mudder website has some training suggestions, but I didn’t really attempt them. I felt that they were too difficult and crazy to attempt at the gym.  My training was basically train for a marathon and I also did some weightlifting, swimming, and some of the DVD Insanity.  So, I would do a workout of either weights, swim, or DVD in the morning and then do my mileage of running in the evenings.  This is probably more than most people would have time to do, so I think that if you’re just maintaining a healthy running schedule with some weight training thrown in there, you would be fine and no need to workout twice a day, either.</p>
-<p>My conclusion: We had a fun time out there, got great weather, and met a couple of good folks.  I don’t think I would do it again because, well, I guess I don’t see what the big deal about it is.  Surely, it taxed me physically, but I didn’t feel like it was truly an intense physical experience.  Certain obstacles were difficult, but the majority of them were very reasonable for anyone in decent shape to complete.  If I was more flexible, the wall climbing may have been easier.  I think, for myself, I didn’t really get that feeling of accomplishment and perhaps this was because I’ve had my sights on the completion of an upcoming marathon and then some mountain hiking.</p>
-<p><img src="//res.cloudinary.com/dgfchlycf/image/upload/v1385447227/943123_10151580136954630_1928244936_n_cexmv2.jpg" alt="Hooray!"></p>
-<p>My recommendation would be, definitely do it if you feel like this would be something that you would enjoy and you’ve got a good group to do it with, but if you’re doing it to prove something to yourself, I think there are more difficult physical challenges out there.  Thanks for reading this.</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&lt;img src=&quot;//res.cloudinary.com/dgfchlycf/image/upload/v1385447221/262292_10151580137014630_246172225_n_uxcfmr.jpg&quot; alt=&quot;The Tough Mudder 
-    
-    </summary>
-    
-    
-      <category term="Running" scheme="http://ralucas.github.io/tags/Running/"/>
-    
-      <category term="Tough Mudder" scheme="http://ralucas.github.io/tags/Tough-Mudder/"/>
     
   </entry>
   
